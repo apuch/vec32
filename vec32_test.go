@@ -20,6 +20,23 @@ func TestVec2(t *testing.T) {
 	testVec2(t, "Mul()", Vec2{15, 24}, v.Mul(v2))
 }
 
+func TestVec3(t *testing.T) {
+	v := Vec3{3, 4, 5}
+	v2 := Vec3{5, 6, 7}
+	n := float32(math.Sqrt(3*3 + 4*4 + 5*5))
+	testVec(t, v, 3, n)
+	testFloat(t, "X", 3, v.X)
+	testFloat(t, "Y", 4, v.Y)
+	testFloat(t, "Z", 5, v.Z)
+	testString(t, "String()", "[3; 4; 5]", v.String())
+	testFloat(t, "Dot()", 3*5+4*6+5*7, v.Dot(v2))
+	testVec3(t, "Add()", Vec3{8, 10, 12}, v.Add(v2))
+	testVec3(t, "Sub()", Vec3{-2, -2, -2}, v.Sub(v2))
+	testVec3(t, "Normalize()", Vec3{3.0 / n, 4.0 / n, 5.0 / n}, v.Normalize())
+	testVec3(t, "Scale()", Vec3{6, 8, 10}, v.Scale(2))
+	testVec3(t, "Mul()", Vec3{15, 24, 35}, v.Mul(v2))
+}
+
 func TestNormNaN(t *testing.T) {
 	v2 := Vec2{}.Normalize()
 	testNaN(t, "X", v2.X)
@@ -45,6 +62,13 @@ func testString(t *testing.T, name, exp, cur string) {
 }
 
 func testVec2(t *testing.T, name string, exp, cur Vec2) {
+	d := exp.Sub(cur).LengthSq() / exp.LengthSq()
+	if Abs(d) > 1e-6 {
+		t.Errorf("%s is wrong - expected %s got %s", name, exp, cur)
+	}
+}
+
+func testVec3(t *testing.T, name string, exp, cur Vec3) {
 	d := exp.Sub(cur).LengthSq() / exp.LengthSq()
 	if Abs(d) > 1e-6 {
 		t.Errorf("%s is wrong - expected %s got %s", name, exp, cur)
