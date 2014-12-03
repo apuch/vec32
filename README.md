@@ -1,6 +1,6 @@
-= Vec32
+# Vec32
 
-== Introduction
+## Introduction
 
 This is a basic library for float32-vector- and -matrix-operations. 
 Currently its only a basic (stupid) implementation of the most needed
