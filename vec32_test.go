@@ -43,6 +43,51 @@ func TestNormNaN(t *testing.T) {
 	testNaN(t, "Y", v2.Y)
 }
 
+var (
+	v2_1 = Vec2{3, 4}
+	v2_2 = Vec2{5, 6}
+	v2_3 = Vec2{0, 0}
+	v3_1 = Vec3{4, 5, 6}
+	v3_2 = Vec3{5, 6, 7}
+	v3_3 = Vec3{0, 0, 0}
+)
+
+func BenchmarkLengthSq2(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		v2_1.Dot(v2_2)
+	}
+}
+
+func BenchmarkLengthSq2E(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Dot(&v2_1, &v2_2)
+	}
+}
+
+func BenchmarkAdd2(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		v2_1.Add(v2_2)
+	}
+}
+
+func BenchmarkAdd2E(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Add2(&v2_1, &v2_2, &v2_3)
+	}
+}
+
+func BenchmarkAdd3(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		v3_1.Add(v3_2)
+	}
+}
+
+func BenchmarkAdd3E(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Add3(&v3_1, &v3_2, &v3_3)
+	}
+}
+
 func testVec(t *testing.T, v Vector, dim int, length float32) {
 	testFloat(t, "Dimension", float32(dim), float32(v.Dim()))
 	testFloat(t, "Length", length, v.Length())

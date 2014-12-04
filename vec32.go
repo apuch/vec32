@@ -59,9 +59,20 @@ func (v Vec2) Dot(v2 Vec2) float32 {
 	return v.X*v2.X + v.Y*v2.Y
 }
 
+// Dot product (explicit)
+func Dot(v1, v2 *Vec2) float32 {
+	return v1.X*v2.X + v1.Y*v2.Y
+}
+
 // Add two vectors
 func (v Vec2) Add(v2 Vec2) Vec2 {
 	return Vec2{v.X + v2.X, v.Y + v2.Y}
+}
+
+// Add two vectors (explicit)
+func Add2(v1, v2, v3 *Vec2) {
+	v3.X = v1.X + v2.X
+	v3.Y = v1.Y + v2.Y
 }
 
 // Substract two vectors
@@ -113,6 +124,13 @@ func (v Vec3) Dot(v2 Vec3) float32 {
 // Add two vectors
 func (v Vec3) Add(v2 Vec3) Vec3 {
 	return Vec3{v.X + v2.X, v.Y + v2.Y, v.Z + v2.Z}
+}
+
+// Add two vectors (explicit)
+func Add3(v1, v2, v3 *Vec3) {
+	v3.X = v1.X + v2.X
+	v3.Y = v1.Y + v2.Y
+	v3.Z = v1.Z + v2.Z
 }
 
 // Substract two vectors
