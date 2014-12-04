@@ -10,6 +10,8 @@ import (
 	"math"
 )
 
+const EPS = float32(2.938735877055719e-39)
+
 // Abstract Vector type.
 //
 // This interface encapsulate common functionality of a vector. The result
@@ -162,4 +164,30 @@ func Abs(v float32) float32 {
 		return v
 	}
 	return -v
+}
+
+func AlmostEqual(a, b float32) bool {
+	fmt.Printf("%f %f %f\n", a, b, a-b)
+	if a == b {
+		return true
+	}
+	diff := a - b
+	if diff < 0 {
+		diff = -diff
+	}
+	if a < 0 {
+		a = -a
+	}
+	if b < 0 {
+		b = -b
+	}
+	if diff < 100*EPS {
+		fmt.Println(diff)
+		return true
+	}
+	return 2*diff/(a+b) < 10*EPS
+}
+
+func Inf(s int) float32 {
+	return float32(math.Inf(s))
 }

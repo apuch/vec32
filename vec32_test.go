@@ -43,6 +43,31 @@ func TestNormNaN(t *testing.T) {
 	testNaN(t, "Y", v2.Y)
 }
 
+func TestAlmostEqual(t *testing.T) {
+	var cases = []struct {
+		a, b    float32
+		isEqual bool
+	}{
+		{0, 0, true},
+		{3, 3, true},
+		{3, 4, false},
+		{4, 3, false},
+		{Inf(+1), Inf(+1), true},
+		{Inf(-1), Inf(+1), false},
+		{Inf(+1), Inf(-1), false},
+		{Inf(-1), Inf(-1), true},
+		{0, EPS * 10, true},
+		{EPS * 10, 0, true},
+		{5, 5 * (1 + 10*EPS), true},
+		{5, 5 * (1 + 200*EPS), false},
+	}
+	for i, tc := range cases {
+		if AlmostEqual(tc.a, tc.b) != tc.isEqual {
+			t.Errorf("tc %d - fail", i)
+		}
+	}
+}
+
 var (
 	v2_1 = Vec2{3, 4}
 	v2_2 = Vec2{5, 6}
