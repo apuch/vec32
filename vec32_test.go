@@ -62,6 +62,8 @@ func TestAlmostEqual(t *testing.T) {
 		{FLOAT_MIN * 120, FLOAT_MIN * 80, true},
 		{5, 5 * (1 + 10*EPS), true},
 		{5, 5 * (1 + 200*EPS), false},
+		{NaN(), NaN(), false},
+		{NaN(), 0, false},
 	}
 	for i, tc := range cases {
 		if AlmostEqual(tc.a, tc.b) != tc.isEqual {

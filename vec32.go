@@ -157,22 +157,23 @@ func (v Vec3) Scale(s float32) Vec3 {
 	return Vec3{v.X * s, v.Y * s, v.Z * s}
 }
 
+// Cross-Product
 func (a Vec3) Cross(b Vec3) Vec3 {
 	return Vec3{a.Y*b.Z - a.Z*b.Y, a.Z*b.X - a.X*b.Z, a.X*b.Y - a.Y*b.X}
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
-// f32-fabs
-func Abs(v float32) float32 {
-	if v >= 0 {
-		return v
-	}
-	return -v
-}
-
+// Compare two floats, if they are almost equal
+//
+// Floats are equal, if:
+//
+// - they are inf of the same sign ( Inf==Inf)
+// - if one is less then 100*FLOAT_MIN and the difference between both
+//   is less than 100*FLOAT_MIN
+// - the relative difference ( (a-b)/(a+b)/2 ) is less than 100 EPS
+// - NaN is unequal to NaN and everything else
 func AlmostEqual(a, b float32) bool {
-	fmt.Printf("%f %f %f\n", a, b, a-b)
 	if a == b {
 		return true
 	}
@@ -192,6 +193,20 @@ func AlmostEqual(a, b float32) bool {
 	return 2*diff/(a+b) < 10*EPS
 }
 
+// f32-fabs
+func Abs(v float32) float32 {
+	if v >= 0 {
+		return v
+	}
+	return -v
+}
+
+// Return +/- Inf (see math.Inf())
 func Inf(s int) float32 {
 	return float32(math.Inf(s))
+}
+
+// Return NaN (see math.NaN())
+func NaN() float32 {
+	return float32(math.NaN())
 }
