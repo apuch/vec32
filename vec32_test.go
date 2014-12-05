@@ -157,6 +157,6 @@ func testVec3(t *testing.T, name string, exp, cur Vec3) {
 
 func testNaN(t *testing.T, name string, val float32) {
 	if !math.IsNaN(float64(val)) {
-		t.Errorf("%s is wrong - %g is not NaN", val)
+		t.Errorf("%s is wrong - %g is not NaN", name, val)
 	}
 }
