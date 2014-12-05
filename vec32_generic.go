@@ -1,0 +1,52 @@
+package vec32
+
+import (
+	"math"
+)
+
+// Compare two floats, if they are almost equal
+//
+// Floats are equal, if:
+//
+// - they are inf of the same sign ( Inf==Inf)
+// - if one is less then 100*FLOAT_MIN and the difference between both
+//   is less than 100*FLOAT_MIN
+// - the relative difference ( (a-b)/(a+b)/2 ) is less than 100 EPS
+// - NaN is unequal to NaN and everything else
+func AlmostEqual(a, b float32) bool {
+	if a == b {
+		return true
+	}
+	diff := a - b
+	if diff < 0 {
+		diff = -diff
+	}
+	if a < 0 {
+		a = -a
+	}
+	if b < 0 {
+		b = -b
+	}
+	if a < 100*FLOAT_MIN || b < 100*FLOAT_MIN {
+		return diff < 100*FLOAT_MIN
+	}
+	return 2*diff/(a+b) < 10*EPS
+}
+
+// f32-fabs
+func Abs(v float32) float32 {
+	if v >= 0 {
+		return v
+	}
+	return -v
+}
+
+// Return +/- Inf (see math.Inf())
+func Inf(s int) float32 {
+	return float32(math.Inf(s))
+}
+
+// Return NaN (see math.NaN())
+func NaN() float32 {
+	return float32(math.NaN())
+}
