@@ -2,7 +2,6 @@ package vec32
 
 import (
 	"fmt"
-	"math"
 )
 
 // Dimension of the vector
@@ -10,7 +9,7 @@ func (v Vec3) Dim() int { return 3 }
 
 // The euklidian length
 func (v Vec3) Length() float32 {
-	return float32(math.Sqrt(float64(v.X*v.X + v.Y*v.Y + v.Z*v.Z)))
+	return Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
 }
 
 // The euklidian length squared

@@ -46,7 +46,22 @@ func Inf(s int) float32 {
 	return float32(math.Inf(s))
 }
 
+// See math.IsInf()
+func IsInf(v float32, s int) bool {
+	return math.IsInf(float64(v), s)
+}
+
 // Return NaN (see math.NaN())
 func NaN() float32 {
 	return float32(math.NaN())
+}
+
+// See math.IsNaN()
+func IsNaN(v float32) bool {
+	return math.IsNaN(float64(v))
+}
+
+// Return Sqrt (see math.Sqrt())
+func Sqrt(v float32) float32 {
+	return float32(math.Sqrt(float64(v)))
 }

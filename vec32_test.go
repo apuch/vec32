@@ -75,7 +75,6 @@ func TestAlmostEqual(t *testing.T) {
 func TestCross(t *testing.T) {
 	c := Vec3{5*7 - 6*6, 5*6 - 4*7, 4*6 - 5*5}
 	testVec3(t, "crossProduct", c, v3_1.Cross(v3_2))
-
 }
 
 var (
@@ -130,7 +129,7 @@ func testVec(t *testing.T, v Vector, dim int, length float32) {
 }
 
 func testFloat(t *testing.T, name string, exp, cur float32) {
-	if exp != cur {
+	if !AlmostEqual(exp, cur) {
 		t.Errorf("%s is wrong - expected %f got %f", name, exp, cur)
 	}
 }
@@ -142,21 +141,19 @@ func testString(t *testing.T, name, exp, cur string) {
 }
 
 func testVec2(t *testing.T, name string, exp, cur Vec2) {
-	d := exp.Sub(cur).LengthSq() / exp.LengthSq()
-	if Abs(d) > 1e-6 {
+	if !AlmostEqual(exp.Sub(cur).Length(), 0) {
 		t.Errorf("%s is wrong - expected %s got %s", name, exp, cur)
 	}
 }
 
 func testVec3(t *testing.T, name string, exp, cur Vec3) {
-	d := exp.Sub(cur).LengthSq() / exp.LengthSq()
-	if Abs(d) > 1e-6 {
+	if !AlmostEqual(exp.Sub(cur).Length(), 0) {
 		t.Errorf("%s is wrong - expected %s got %s", name, exp, cur)
 	}
 }
 
 func testNaN(t *testing.T, name string, val float32) {
-	if !math.IsNaN(float64(val)) {
+	if !IsNaN(val) {
 		t.Errorf("%s is wrong - %g is not NaN", name, val)
 	}
 }
