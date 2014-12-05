@@ -157,6 +157,10 @@ func (v Vec3) Scale(s float32) Vec3 {
 	return Vec3{v.X * s, v.Y * s, v.Z * s}
 }
 
+func (a Vec3) Cross(b Vec3) Vec3 {
+	return Vec3{a.Y*b.Z - a.Z*b.Y, a.Z*b.X - a.X*b.Z, a.X*b.Y - a.Y*b.X}
+}
+
 ///////////////////////////////////////////////////////////////////////////
 
 // f32-fabs

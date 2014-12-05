@@ -70,6 +70,12 @@ func TestAlmostEqual(t *testing.T) {
 	}
 }
 
+func TestCross(t *testing.T) {
+	c := Vec3{5*7 - 6*6, 5*6 - 4*7, 4*6 - 5*5}
+	testVec3(t, "crossProduct", c, v3_1.Cross(v3_2))
+
+}
+
 var (
 	v2_1 = Vec2{3, 4}
 	v2_2 = Vec2{5, 6}
