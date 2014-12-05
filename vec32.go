@@ -10,7 +10,8 @@ import (
 	"math"
 )
 
-const EPS = float32(2.938735877055719e-39)
+const EPS = float32(1.192e-7)
+const FLOAT_MIN = 2.938735877055719e-39
 
 // Abstract Vector type.
 //
@@ -181,9 +182,8 @@ func AlmostEqual(a, b float32) bool {
 	if b < 0 {
 		b = -b
 	}
-	if diff < 100*EPS {
-		fmt.Println(diff)
-		return true
+	if a < 100*FLOAT_MIN || b < 100*FLOAT_MIN {
+		return diff < 100*FLOAT_MIN
 	}
 	return 2*diff/(a+b) < 10*EPS
 }

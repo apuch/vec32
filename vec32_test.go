@@ -56,8 +56,10 @@ func TestAlmostEqual(t *testing.T) {
 		{Inf(-1), Inf(+1), false},
 		{Inf(+1), Inf(-1), false},
 		{Inf(-1), Inf(-1), true},
-		{0, EPS * 10, true},
-		{EPS * 10, 0, true},
+		{0, FLOAT_MIN * 10, true},
+		{FLOAT_MIN * 10, 0, true},
+		{FLOAT_MIN * 80, FLOAT_MIN * 120, true},
+		{FLOAT_MIN * 120, FLOAT_MIN * 80, true},
 		{5, 5 * (1 + 10*EPS), true},
 		{5, 5 * (1 + 200*EPS), false},
 	}
