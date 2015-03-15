@@ -72,6 +72,25 @@ func TestAlmostEqual(t *testing.T) {
 	}
 }
 
+func TestEqual(t *testing.T) {
+	var cases = []struct {
+		a, b    Vec3
+		isEqual bool
+	}{
+		{Vec3{1, 2, 3}, Vec3{1, 2, 3}, true},
+		{Vec3{0, 0, 0}, Vec3{0, 0, 0}, true},
+		{Vec3{0, 0, 0}, Vec3{FLOAT_MIN, 0, 0}, false},
+		{Vec3{0, 0, 0}, Vec3{0, FLOAT_MIN, 0}, false},
+		{Vec3{0, 0, 0}, Vec3{0, 0, FLOAT_MIN}, false},
+	}
+	for i, tc := range cases {
+		if tc.a.IsEqual(tc.b) != tc.isEqual || tc.b.IsEqual(tc.a) != tc.isEqual {
+			t.Errorf("tc %d failed", i)
+		}
+	}
+
+}
+
 func TestCross(t *testing.T) {
 	c := Vec3{5*7 - 6*6, 5*6 - 4*7, 4*6 - 5*5}
 	testVec3(t, "crossProduct", c, v3_1.Cross(v3_2))

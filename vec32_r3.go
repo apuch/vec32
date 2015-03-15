@@ -64,3 +64,8 @@ func (v Vec3) Scale(s float32) Vec3 {
 func (a Vec3) Cross(b Vec3) Vec3 {
 	return Vec3{a.Y*b.Z - a.Z*b.Y, a.Z*b.X - a.X*b.Z, a.X*b.Y - a.Y*b.X}
 }
+
+// Equal
+func (a Vec3) IsEqual(b Vec3) bool {
+	return a.X == b.X && a.Y == b.Y && a.Z == b.Z
+}
