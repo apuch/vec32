@@ -9,10 +9,13 @@ import (
 // Floats are equal, if:
 //
 // - they are inf of the same sign ( Inf==Inf)
-// - if one is less then 100*FLOAT_MIN and the difference between both
-//   is less than 100*FLOAT_MIN
+//
+// - if one is less then 100*FLOAT_MIN and the difference between both is less than 100*FLOAT_MIN
+//
 // - the relative difference ( (a-b)/(a+b)/2 ) is less than 100 EPS
+//
 // - NaN is unequal to NaN and everything else
+//
 func AlmostEqual(a, b float32) bool {
 	if a == b {
 		return true

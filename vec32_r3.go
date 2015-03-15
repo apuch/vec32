@@ -39,6 +39,13 @@ func Add3(v1, v2, v3 *Vec3) {
 	v3.Z = v1.Z + v2.Z
 }
 
+// Substract two vectors (explicit)
+func Sub3(v1, v2, v3 *Vec3) {
+	v3.X = v1.X - v2.X
+	v3.Y = v1.Y - v2.Y
+	v3.Z = v1.Z - v2.Z
+}
+
 // Substract two vectors
 func (v *Vec3) Sub(v2 *Vec3) *Vec3 {
 	return &Vec3{v.X - v2.X, v.Y - v2.Y, v.Z - v2.Z}
@@ -63,6 +70,13 @@ func (v *Vec3) Scale(s float32) *Vec3 {
 // Cross-Product
 func (a *Vec3) Cross(b *Vec3) *Vec3 {
 	return &Vec3{a.Y*b.Z - a.Z*b.Y, a.Z*b.X - a.X*b.Z, a.X*b.Y - a.Y*b.X}
+}
+
+// Cross-Product (implicit)
+func Cross3(a, b, c *Vec3) {
+	c.X = a.Y*b.Z - a.Z*b.Y
+	c.Y = a.Z*b.X - a.X*b.Z
+	c.Z = a.X*b.Y - a.Y*b.X
 }
 
 // Equal

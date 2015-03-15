@@ -28,3 +28,7 @@ type Ray struct {
 	P0 Vec3
 	N  Vec3
 }
+
+type Intersection struct {
+	t, u, v float32
+}
