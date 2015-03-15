@@ -66,6 +66,6 @@ func (a Vec3) Cross(b Vec3) Vec3 {
 }
 
 // Equal
-func (a Vec3) IsEqual(b Vec3) bool {
+func (a Vec3) IsEqual(b *Vec3) bool {
 	return a.X == b.X && a.Y == b.Y && a.Z == b.Z
 }

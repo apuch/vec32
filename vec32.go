@@ -31,3 +31,14 @@ type Vec2 struct {
 type Vec3 struct {
 	X, Y, Z float32
 }
+
+// Triangle in R3
+type Triangle struct {
+	P1, P2, P3 *Vec3
+}
+
+// A Ray
+type Ray struct {
+	P0 Vec3
+	N  Vec3
+}

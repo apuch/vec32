@@ -84,7 +84,7 @@ func TestEqual(t *testing.T) {
 		{Vec3{0, 0, 0}, Vec3{0, 0, FLOAT_MIN}, false},
 	}
 	for i, tc := range cases {
-		if tc.a.IsEqual(tc.b) != tc.isEqual || tc.b.IsEqual(tc.a) != tc.isEqual {
+		if tc.a.IsEqual(&tc.b) != tc.isEqual || tc.b.IsEqual(&tc.a) != tc.isEqual {
 			t.Errorf("tc %d failed", i)
 		}
 	}
