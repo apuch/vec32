@@ -17,8 +17,8 @@ func TestTriangle(t *testing.T) {
 
 func TestRay(t *testing.T) {
 	r := NewRay(&v1, &v2)
-	n := v2.Sub(v1).Normalize()
-	if !r.P0.IsEqual(&v1) || !r.N.IsEqual(&n) {
+	n := v2.Sub(&v1).Normalize()
+	if !r.P0.IsEqual(&v1) || !r.N.IsEqual(n) {
 		t.Errorf("Initialization failed")
 	}
 }
