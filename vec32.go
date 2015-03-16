@@ -29,6 +29,18 @@ type Ray struct {
 	N  Vec3
 }
 
+// Box othogonal to axis
+//
+// P1 is always above P0
+type OrthoBox struct {
+	P0, P1 Vec3
+}
+
 type Intersection struct {
 	t, u, v float32
+}
+
+// a generic object you can see
+type Object interface {
+	OrthoBox() OrthoBox
 }

@@ -36,6 +36,11 @@ func AlmostEqual(a, b float32) bool {
 	return 2*diff/(a+b) < 10*EPS
 }
 
+// AlmostEqual() in R3
+func AlmostEqual3(a, b *Vec3) bool {
+	return AlmostEqual(a.X, b.X) && AlmostEqual(a.Y, b.Y) && AlmostEqual(a.Z, b.Z)
+}
+
 // f32-fabs
 func Abs(v float32) float32 {
 	if v >= 0 {
@@ -67,4 +72,20 @@ func IsNaN(v float32) bool {
 // Return Sqrt (see math.Sqrt())
 func Sqrt(v float32) float32 {
 	return float32(math.Sqrt(float64(v)))
+}
+
+// Max
+func Max(a, b float32) float32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+// Min
+func Min(a, b float32) float32 {
+	if a < b {
+		return a
+	}
+	return b
 }
