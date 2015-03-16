@@ -43,4 +43,5 @@ type Intersection struct {
 // a generic object you can see
 type Object interface {
 	OrthoBox() OrthoBox
+	Intersect(r *Ray, i *Intersection) float32
 }

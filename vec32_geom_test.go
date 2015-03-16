@@ -38,7 +38,7 @@ func TestIntersect(t *testing.T) {
 	}
 	var inter Intersection
 	for i, tc := range cases {
-		valT := tc.ray.Intersect(&tri, &inter, Inf(1))
+		valT := tri.Intersect(&tc.ray, &inter)
 		if !AlmostEqual(valT, tc.t) {
 			t.Errorf("failed at tc %d: expected %f, got %f", i, tc.t, valT)
 		}
