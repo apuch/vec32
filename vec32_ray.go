@@ -16,7 +16,7 @@ func (r *Ray) At(t float32, v *Vec3) {
 // ray-triangle-intersection by Möller–Trumbore
 //
 // returns inf if triangle isn't hit. Will always be greater zero
-func (r *Ray) Intersect(tri *Triangle, i *Intersection, tMax float32) float32 {
+func (r *Ray) Intersect(tri *Triangle, i *Intersection) float32 {
 	var e1, e2, P, Q, T Vec3
 	var t, det, inv_det, u, v float32
 	Sub3(tri.P2, tri.P1, &e1)
@@ -42,7 +42,7 @@ func (r *Ray) Intersect(tri *Triangle, i *Intersection, tMax float32) float32 {
 	}
 	t = e2.Dot(&Q) * inv_det
 
-	if t > 100*EPS && t < tMax {
+	if t > 100*EPS {
 		i.u = u
 		i.v = v
 		i.t = t
