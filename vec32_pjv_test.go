@@ -55,6 +55,9 @@ func TestVerts(t *testing.T) {
 		{valid1VertHeader, "unexpected end of file"},
 		{valid1VertHeader + "0 0\r", "unexpected end of line"},
 		{valid1VertHeader + "0 0 0\r", ""},
+		{valid1VertHeader + "0  0  0\r", ""},
+		{valid1VertHeader + "0 0 0 \r", ""},
+		{valid1VertHeader + " 0 0 0\r", ""},
 		{valid1VertHeader + "0 0 0", "unexpected end of file"},
 	}
 	for i, tc := range cases {
