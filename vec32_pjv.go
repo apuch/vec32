@@ -4,11 +4,17 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 )
 
+// Struct holding all informations of a mesh
+//
+// this struct will move somewhere else as soon as we support a second
+// formar. Until then...
 type Mesh struct {
-	Points []Vec3
+	// The vertices we have
+	Verts []Vec3
 }
 
 const (
@@ -23,6 +29,20 @@ const (
 	typeDouble = iota
 )
 
+const (
+	propIgnore = iota
+	propX      = iota
+	propY      = iota
+	propZ      = iota
+	propCount  = iota
+)
+
+var propMap = map[string]uint{
+	"x": propX,
+	"y": propY,
+	"z": propZ,
+}
+
 var typeMap = map[string]uint{
 	"char":   typeChar,
 	"uchar":  typeUchar,
@@ -34,20 +54,23 @@ var typeMap = map[string]uint{
 }
 
 type meshBuilder struct {
-	rd         *bufio.Reader
-	mesh       *Mesh
-	facesPhase bool
-	nVerts     int
-	nFaces     int
-	vertFmt    string
-	faceFmt    string
-	vertProp   []property
-	faceProp   []property
+	rd          *bufio.Reader
+	mesh        *Mesh
+	facesPhase  bool
+	nVerts      int
+	nFaces      int
+	vertProp    []property
+	vertPropIdx int
+	faceProp    []property
+	facePropIdx int
+	haveVerts   bool
+	scanner     *bufio.Scanner
 }
 
 type property struct {
-	dataType uint
-	Name     string
+	propType uint
+	propIdx  uint
+	name     string
 }
 
 func ReadPLY(r io.Reader) (m *Mesh, err error) {
@@ -55,12 +78,14 @@ func ReadPLY(r io.Reader) (m *Mesh, err error) {
 	mb := meshBuilder{}
 	mb.rd = rd
 	mb.mesh = &Mesh{}
-	mb.vertFmt = ""
-	mb.faceFmt = ""
 	mb.vertProp = make([]property, 64)
 	mb.faceProp = make([]property, 64)
-	err = mb.readHeader()
-	if err != nil {
+	if err = mb.readHeader(); err != nil {
+		return nil, err
+	}
+	mb.scanner = bufio.NewScanner(mb.rd)
+	mb.scanner.Split(bufio.ScanWords)
+	if err = mb.readVerts(); err != nil {
 		return nil, err
 	}
 	return mb.mesh, nil
@@ -87,11 +112,11 @@ func (mb *meshBuilder) readHeader() error {
 			return newErrorMesh(err.Error())
 		}
 		if line == "end_header\r" {
-			return nil
+			return mb.validateHeader()
 		} else if strings.HasPrefix(line, "comment ") {
 			// pass
 		} else if strings.HasPrefix(line, "element vertex ") {
-			if e := mb.readElement(line); e != nil {
+			if e := mb.readElementVertex(line); e != nil {
 				return e
 			}
 		} else if strings.HasPrefix(line, "element face ") {
@@ -115,27 +140,118 @@ func (mb *meshBuilder) readFace(line string) error {
 	return nil
 }
 
-func (mb *meshBuilder) readElement(line string) error {
-	if n, e := fmt.Sscanf(line, "element vertex %d\r", &mb.nVerts); e != nil || n != 1 {
+func (mb *meshBuilder) readElementVertex(line string) error {
+	if n, e := fmt.Sscanf(line, "element vertex %d\r", &mb.nVerts); e != nil || n != 1 || mb.nVerts < 0 {
 		return newErrorMesh("failed to parse number of vertices")
 	}
+	mb.haveVerts = mb.nVerts > 0
 	return nil
 }
 
 func (mb *meshBuilder) readProperty(line string) error {
-	var propType, name string
-	if n, e := fmt.Sscanf(line, "property %s %s", &propType, &name); n != 2 || e != nil {
+	var propTypeName, name string
+	if n, e := fmt.Sscanf(line, "property %s %s", &propTypeName, &name); n != 2 || e != nil {
 		return newErrorMesh("failed to parse: " + line)
 	}
-	_, ok := typeMap[propType]
+	propType, ok := typeMap[propTypeName]
 	if !ok {
-		return newErrorMesh("unknown property type: " + propType)
+		return newErrorMesh("unknown property type: " + propTypeName)
+	}
+	if !mb.facesPhase {
+		mb.addVertProperty(propType, name)
 	}
 	return nil
 }
 
 func (mb *meshBuilder) addVertProperty(propType uint, name string) {
+	prop := &mb.vertProp[mb.vertPropIdx]
+	mb.vertPropIdx += 1
+	prop.name = name
+	prop.propType = propType
+	prop.propIdx, _ = propMap[name]
+}
 
+func (mb *meshBuilder) validateHeader() error {
+	if !mb.haveVerts {
+		return nil
+	}
+	var haveX, haveY, haveZ bool
+	for i := 0; i < mb.vertPropIdx; i++ {
+		switch mb.vertProp[i].propIdx {
+		case propX:
+			haveX = true
+		case propY:
+			haveY = true
+		case propZ:
+			haveZ = true
+		}
+	}
+	if !(haveX && haveY && haveZ) {
+		return newErrorMesh("invalid vertex definition (missing coordinate)")
+	}
+	return nil
+}
+
+func (mb *meshBuilder) readVerts() error {
+	for i := 0; i < mb.nVerts; i++ {
+		mb.scanner.Split(splitSpace)
+		for j := 0; j < mb.vertPropIdx; j++ {
+			if !mb.scanner.Scan() {
+				return mb.scanner.Err()
+			}
+			if _, err := strconv.ParseFloat(mb.scanner.Text(), 32); err != nil {
+				return newErrorMesh("could not convert `" + mb.scanner.Text() + "` to float")
+			}
+		}
+		mb.scanner.Split(splitBreak)
+	}
+	return nil
+}
+
+func splitSpace(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	var start, end int
+	for ; start < len(data); start++ {
+		if data[start] != ' ' {
+			break
+		}
+		if data[start] == '\r' {
+			return 0, nil, newErrorMesh("unexpected end of line")
+		}
+	}
+	if start < len(data) && data[start] == '\r' {
+		return 0, nil, newErrorMesh("unexpected end of line")
+	}
+	if start == len(data)-1 {
+		return 0, nil, newErrorMesh("unexpected end of file")
+	}
+	for end = start + 1; end < len(data); end++ {
+		if data[end] == ' ' || data[end] == '\r' {
+			return end, data[start:end], nil
+		}
+	}
+	return 0, nil, newErrorMesh("unexpected end of file")
+}
+
+func splitBreak(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	var start, end int
+	for ; start < len(data); start++ {
+		if data[start] != '\r' {
+			break
+		}
+		if data[start] != ' ' {
+			return 0, nil, newErrorMesh("unexpected token")
+		}
+	}
+	start += 1
+	if start == len(data)-1 {
+		return 0, nil, newErrorMesh("unexpected end of file")
+	}
+	for end = start + 1; end < len(data); end++ {
+		if data[end] == ' ' || data[end] == '\r' {
+			return end, data[start:end], nil
+		}
+	}
+	return 0, nil, newErrorMesh("unexpected end of file")
 }
 
 // Error in mesh creation or something
