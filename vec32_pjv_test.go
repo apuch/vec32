@@ -39,39 +39,23 @@ func TestHeaderBasic(t *testing.T) {
 
 func TestVerts(t *testing.T) {
 	header1Vert := headerStart + "element vertex 1\r"
+	validVertCoord := "property float x\r" +
+		"property float y\r" +
+		"property float z\r"
+	valid1VertHeader := header1Vert + validVertCoord + headerEnd
 	var cases = []struct {
 		inputStr string
 		errorRsp string
 	}{
-		{header1Vert +
-			"property float x\r" +
-			"property float y\r" +
-			"property float z\r" +
-			headerEnd + "0 0 0\r", ""},
+		{valid1VertHeader + "0 0 0\r", ""},
 		{header1Vert +
 			"property float x\r" +
 			"property float y\r" +
 			headerEnd + "0 0 0\r", "invalid vertex definition (missing coordinate)"},
-		{header1Vert +
-			"property float x\r" +
-			"property float y\r" +
-			"property float z\r" +
-			headerEnd, "unexpected end of file"},
-		{header1Vert +
-			"property float x\r" +
-			"property float y\r" +
-			"property float z\r" +
-			headerEnd + "0 0\r", "unexpected end of line"},
-		{header1Vert +
-			"property float x\r" +
-			"property float y\r" +
-			"property float z\r" +
-			headerEnd + "0 0 0\r", ""},
-		{header1Vert +
-			"property float x\r" +
-			"property float y\r" +
-			"property float z\r" +
-			headerEnd + "0 0 0", "unexpected end of file"},
+		{valid1VertHeader, "unexpected end of file"},
+		{valid1VertHeader + "0 0\r", "unexpected end of line"},
+		{valid1VertHeader + "0 0 0\r", ""},
+		{valid1VertHeader + "0 0 0", "unexpected end of file"},
 	}
 	for i, tc := range cases {
 		testError(t, i, tc.inputStr, tc.errorRsp)
