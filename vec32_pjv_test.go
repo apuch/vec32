@@ -9,7 +9,14 @@ import (
 const (
 	headerStart = "ply\r" +
 		"format ascii 1.0\r"
-	headerEnd = "end_header\r"
+	headerEnd      = "end_header\r"
+	header1Vert    = headerStart + "element vertex 1\r"
+	header2Vert    = headerStart + "element vertex 2\r"
+	validVertCoord = "property float x\r" +
+		"property float y\r" +
+		"property float z\r"
+	valid1VertHeader = header1Vert + validVertCoord + headerEnd
+	valid2VertHeader = header2Vert + validVertCoord + headerEnd
 )
 
 func newReader(s string) io.Reader {
@@ -37,12 +44,7 @@ func TestHeaderBasic(t *testing.T) {
 	}
 }
 
-func TestVerts(t *testing.T) {
-	header1Vert := headerStart + "element vertex 1\r"
-	validVertCoord := "property float x\r" +
-		"property float y\r" +
-		"property float z\r"
-	valid1VertHeader := header1Vert + validVertCoord + headerEnd
+func TestVertsHeader(t *testing.T) {
 	var cases = []struct {
 		inputStr string
 		errorRsp string
@@ -58,10 +60,22 @@ func TestVerts(t *testing.T) {
 		{valid1VertHeader + "0  0  0\r", ""},
 		{valid1VertHeader + "0 0 0 \r", ""},
 		{valid1VertHeader + " 0 0 0\r", ""},
+		{valid2VertHeader + " 0 0 0\r0 0 0\r", ""},
 		{valid1VertHeader + "0 0 0", "unexpected end of file"},
 	}
 	for i, tc := range cases {
 		testError(t, i, tc.inputStr, tc.errorRsp)
+	}
+}
+
+func TestVerts(t *testing.T) {
+	m, err := ReadPLY(newReader(valid2VertHeader + "1 2 3\r4 5 6\r"))
+	if err != nil {
+		t.Errorf("error at reading PLY: %s", err.Error())
+		return
+	}
+	if len(m.Verts) != 2 {
+		t.Errorf("Expected 2 verts, got %d", len(m.Verts))
 	}
 }
 

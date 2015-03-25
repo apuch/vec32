@@ -211,11 +211,11 @@ func (mb *meshBuilder) readVerts() error {
 func splitSpace(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	var start, end int
 	for ; start < len(data); start++ {
-		if data[start] != ' ' {
-			break
-		}
 		if data[start] == '\r' {
 			return 0, nil, newErrorMesh("unexpected end of line")
+		}
+		if data[start] != ' ' {
+			break
 		}
 	}
 	if start < len(data) && data[start] == '\r' {
