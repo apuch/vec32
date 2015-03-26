@@ -85,6 +85,7 @@ func ReadPLY(r io.Reader) (m *Mesh, err error) {
 	}
 	mb.scanner = bufio.NewScanner(mb.rd)
 	mb.scanner.Split(bufio.ScanWords)
+	mb.mesh.Verts = make([]Vec3, mb.nVerts)
 	if err = mb.readVerts(); err != nil {
 		return nil, err
 	}
@@ -194,64 +195,30 @@ func (mb *meshBuilder) validateHeader() error {
 
 func (mb *meshBuilder) readVerts() error {
 	for i := 0; i < mb.nVerts; i++ {
-		mb.scanner.Split(splitSpace)
 		for j := 0; j < mb.vertPropIdx; j++ {
 			if !mb.scanner.Scan() {
-				return mb.scanner.Err()
+				return newErrorMesh("unexpected end of file")
 			}
-			if _, err := strconv.ParseFloat(mb.scanner.Text(), 32); err != nil {
+			var val float64
+			var err error
+			if val, err = strconv.ParseFloat(strings.Trim(mb.scanner.Text(), " \r"), 32); err != nil {
 				return newErrorMesh("could not convert `" + mb.scanner.Text() + "` to float")
 			}
+			mb.addVertProp(i, int(mb.vertProp[j].propIdx), float32(val))
 		}
-		mb.scanner.Split(splitBreak)
 	}
 	return nil
 }
 
-func splitSpace(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	var start, end int
-	for ; start < len(data); start++ {
-		if data[start] == '\r' {
-			return 0, nil, newErrorMesh("unexpected end of line")
-		}
-		if data[start] != ' ' {
-			break
-		}
+func (mb *meshBuilder) addVertProp(vertIdx, propIdx int, value float32) {
+	switch propIdx {
+	case propX:
+		mb.mesh.Verts[vertIdx].X = value
+	case propY:
+		mb.mesh.Verts[vertIdx].Y = value
+	case propZ:
+		mb.mesh.Verts[vertIdx].Z = value
 	}
-	if start < len(data) && data[start] == '\r' {
-		return 0, nil, newErrorMesh("unexpected end of line")
-	}
-	if start == len(data)-1 {
-		return 0, nil, newErrorMesh("unexpected end of file")
-	}
-	for end = start + 1; end < len(data); end++ {
-		if data[end] == ' ' || data[end] == '\r' {
-			return end, data[start:end], nil
-		}
-	}
-	return 0, nil, newErrorMesh("unexpected end of file")
-}
-
-func splitBreak(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	var start, end int
-	for ; start < len(data); start++ {
-		if data[start] != '\r' {
-			break
-		}
-		if data[start] != ' ' {
-			return 0, nil, newErrorMesh("unexpected token")
-		}
-	}
-	start += 1
-	if start == len(data)-1 {
-		return 0, nil, newErrorMesh("unexpected end of file")
-	}
-	for end = start + 1; end < len(data); end++ {
-		if data[end] == ' ' || data[end] == '\r' {
-			return end, data[start:end], nil
-		}
-	}
-	return 0, nil, newErrorMesh("unexpected end of file")
 }
 
 // Error in mesh creation or something

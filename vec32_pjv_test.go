@@ -55,13 +55,14 @@ func TestVertsHeader(t *testing.T) {
 			"property float y\r" +
 			headerEnd + "0 0 0\r", "invalid vertex definition (missing coordinate)"},
 		{valid1VertHeader, "unexpected end of file"},
-		{valid1VertHeader + "0 0\r", "unexpected end of line"},
+		{valid1VertHeader + "0 0\r", "unexpected end of file"},
 		{valid1VertHeader + "0 0 0\r", ""},
 		{valid1VertHeader + "0  0  0\r", ""},
 		{valid1VertHeader + "0 0 0 \r", ""},
 		{valid1VertHeader + " 0 0 0\r", ""},
 		{valid2VertHeader + " 0 0 0\r0 0 0\r", ""},
-		{valid1VertHeader + "0 0 0", "unexpected end of file"},
+		{valid1VertHeader + "0 0 0", ""},
+		{valid1VertHeader + "0 0 X", "could not convert `X` to float"},
 	}
 	for i, tc := range cases {
 		testError(t, i, tc.inputStr, tc.errorRsp)
@@ -76,6 +77,10 @@ func TestVerts(t *testing.T) {
 	}
 	if len(m.Verts) != 2 {
 		t.Errorf("Expected 2 verts, got %d", len(m.Verts))
+	}
+	if !m.Verts[0].IsEqual(&Vec3{1, 2, 3}) || !m.Verts[1].IsEqual(&Vec3{4, 5, 6}) {
+		t.Errorf("read wrong vectors (%s and %s)",
+			m.Verts[0].String(), m.Verts[1].String())
 	}
 }
 
