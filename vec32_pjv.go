@@ -15,6 +15,7 @@ import (
 type Mesh struct {
 	// The vertices we have
 	Verts []Vec3
+	Tris  []Triangle
 }
 
 const (
@@ -35,6 +36,12 @@ const (
 	propY      = iota
 	propZ      = iota
 	propCount  = iota
+)
+
+const (
+	elementIgnore = iota
+	elementVert   = iota
+	elementFace   = iota
 )
 
 var propMap = map[string]uint{
@@ -65,6 +72,8 @@ type meshBuilder struct {
 	facePropIdx int
 	haveVerts   bool
 	scanner     *bufio.Scanner
+	currElement uint
+	triIdx      int
 }
 
 type property struct {
@@ -86,7 +95,11 @@ func ReadPLY(r io.Reader) (m *Mesh, err error) {
 	mb.scanner = bufio.NewScanner(mb.rd)
 	mb.scanner.Split(bufio.ScanWords)
 	mb.mesh.Verts = make([]Vec3, mb.nVerts)
+	mb.mesh.Tris = make([]Triangle, mb.nFaces)
 	if err = mb.readVerts(); err != nil {
+		return nil, err
+	}
+	if err = mb.readFaces(); err != nil {
 		return nil, err
 	}
 	return mb.mesh, nil
@@ -138,6 +151,7 @@ func (mb *meshBuilder) readFace(line string) error {
 	if n, e := fmt.Sscanf(line, "element face %d\r", &mb.nFaces); e != nil || n != 1 {
 		return newErrorMesh("failed to parse number of faces")
 	}
+	mb.currElement = elementFace
 	return nil
 }
 
@@ -145,21 +159,33 @@ func (mb *meshBuilder) readElementVertex(line string) error {
 	if n, e := fmt.Sscanf(line, "element vertex %d\r", &mb.nVerts); e != nil || n != 1 || mb.nVerts < 0 {
 		return newErrorMesh("failed to parse number of vertices")
 	}
+	mb.currElement = elementVert
 	mb.haveVerts = mb.nVerts > 0
 	return nil
 }
 
 func (mb *meshBuilder) readProperty(line string) error {
-	var propTypeName, name string
-	if n, e := fmt.Sscanf(line, "property %s %s", &propTypeName, &name); n != 2 || e != nil {
-		return newErrorMesh("failed to parse: " + line)
+	if mb.currElement == elementIgnore {
+		return nil
 	}
-	propType, ok := typeMap[propTypeName]
-	if !ok {
-		return newErrorMesh("unknown property type: " + propTypeName)
-	}
-	if !mb.facesPhase {
-		mb.addVertProperty(propType, name)
+	if mb.currElement == elementVert {
+		var propTypeName, name string
+		n, e := fmt.Sscanf(line, "property %s %s", &propTypeName, &name)
+		if n != 2 || e != nil {
+			return newErrorMesh("failed to parse: " + line)
+		}
+		propType, ok := typeMap[propTypeName]
+		if !ok {
+			return newErrorMesh("unknown property type: " + propTypeName)
+		}
+		if !mb.facesPhase {
+			mb.addVertProperty(propType, name)
+		}
+	} else if mb.currElement == elementFace {
+		if !strings.HasPrefix(line, "property list ") {
+			return newErrorMesh("only lists supported for faces")
+		}
+		// should be a std-list
 	}
 	return nil
 }
@@ -196,18 +222,91 @@ func (mb *meshBuilder) validateHeader() error {
 func (mb *meshBuilder) readVerts() error {
 	for i := 0; i < mb.nVerts; i++ {
 		for j := 0; j < mb.vertPropIdx; j++ {
-			if !mb.scanner.Scan() {
-				return newErrorMesh("unexpected end of file")
-			}
-			var val float64
+			var val float32
 			var err error
-			if val, err = strconv.ParseFloat(strings.Trim(mb.scanner.Text(), " \r"), 32); err != nil {
-				return newErrorMesh("could not convert `" + mb.scanner.Text() + "` to float")
+			if val, err = mb.nextFloat(); err != nil {
+				return err
 			}
 			mb.addVertProp(i, int(mb.vertProp[j].propIdx), float32(val))
 		}
 	}
 	return nil
+}
+
+func (mb *meshBuilder) readFaces() error {
+	for i := 0; i < mb.nFaces; i++ {
+		// we only expect lists here
+		if !mb.scanner.Scan() {
+			return newErrorMesh("unexpected end of file")
+		}
+		var cnt int64
+		var err error
+		if cnt, err = strconv.ParseInt(mb.scanner.Text(), 10, 32); err != nil {
+			return newErrorMesh("could not convert `" + mb.scanner.Text() + "` to int")
+		}
+		if cnt < 3 {
+			return newErrorMesh("a face must have at least 3 indices")
+		}
+		var p0, p1, p2 int32
+		if p0, err = mb.nextInt(); err != nil {
+			return err
+		}
+		if p1, err = mb.nextInt(); err != nil {
+			return err
+		}
+		for j := 2; j < int(cnt); j++ {
+			if p2, err = mb.nextInt(); err != nil {
+				return err
+			}
+			mb.addTriangle(p0, p1, p2)
+			p1 = p2
+		}
+	}
+	mb.mesh.Tris = mb.mesh.Tris[0:mb.triIdx]
+	return nil
+}
+
+func (mb *meshBuilder) addTriangle(p0, p1, p2 int32) {
+	if mb.triIdx+1 == cap(mb.mesh.Tris) {
+		tmp := make([]Triangle, 3*cap(mb.mesh.Tris)/2+1)
+		copy(tmp, mb.mesh.Tris)
+		mb.mesh.Tris = tmp
+	}
+	mb.mesh.Tris[mb.triIdx].P1 = &mb.mesh.Verts[p0]
+	mb.mesh.Tris[mb.triIdx].P2 = &mb.mesh.Verts[p1]
+	mb.mesh.Tris[mb.triIdx].P3 = &mb.mesh.Verts[p2]
+	mb.triIdx += 1
+}
+
+func (mb *meshBuilder) nextFloat() (val float32, err error) {
+	var token string
+	if token, err = mb.getToken(); err != nil {
+		return 0, err
+	}
+	var result float64
+	if result, err = strconv.ParseFloat(token, 32); err != nil {
+		return 0, newErrorMesh("could not convert `" + token + "` to float")
+	}
+	return float32(result), nil
+}
+
+func (mb *meshBuilder) nextInt() (val int32, err error) {
+	var token string
+	if token, err = mb.getToken(); err != nil {
+		return 0, err
+	}
+	var result int64
+	if result, err = strconv.ParseInt(token, 10, 32); err != nil {
+		return 0, newErrorMesh("could not convert `" + token + "` to int")
+	}
+	return int32(result), nil
+}
+
+func (mb *meshBuilder) getToken() (token string, err error) {
+	if !mb.scanner.Scan() {
+		return "", newErrorMesh("unexpected end of file")
+	}
+	return mb.scanner.Text(), nil
 }
 
 func (mb *meshBuilder) addVertProp(vertIdx, propIdx int, value float32) {

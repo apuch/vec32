@@ -12,11 +12,22 @@ const (
 	headerEnd      = "end_header\r"
 	header1Vert    = headerStart + "element vertex 1\r"
 	header2Vert    = headerStart + "element vertex 2\r"
+	header6Vert    = headerStart + "element vertex 6\r"
 	validVertCoord = "property float x\r" +
 		"property float y\r" +
 		"property float z\r"
 	valid1VertHeader = header1Vert + validVertCoord + headerEnd
 	valid2VertHeader = header2Vert + validVertCoord + headerEnd
+	valid1FaceHeader = header6Vert + validVertCoord +
+		"element face 1\rproperty list uchar int\r" + headerEnd
+	valid3FaceHeader = header6Vert + validVertCoord +
+		"element face 3\rproperty list uchar int\r" + headerEnd
+	valid6Coords = "0 0 0\r" +
+		"0 1 0\r" +
+		"1 1 0\r" +
+		"1 0 0\r" +
+		"0 2 0\r" +
+		"1 2 0\r"
 )
 
 func newReader(s string) io.Reader {
@@ -54,6 +65,10 @@ func TestVertsHeader(t *testing.T) {
 			"property float x\r" +
 			"property float y\r" +
 			headerEnd + "0 0 0\r", "invalid vertex definition (missing coordinate)"},
+		{header1Vert +
+			"property float foobar\r" +
+			validVertCoord +
+			headerEnd + "0 0 0 0\r", ""},
 		{valid1VertHeader, "unexpected end of file"},
 		{valid1VertHeader + "0 0\r", "unexpected end of file"},
 		{valid1VertHeader + "0 0 0\r", ""},
@@ -84,10 +99,41 @@ func TestVerts(t *testing.T) {
 	}
 }
 
-func testError(t *testing.T, tc int, mesh, errTest string) {
-	_, err := ReadPLY(newReader(mesh))
+func TestFaces(t *testing.T) {
+	header := valid1FaceHeader + valid6Coords
+	header3 := valid3FaceHeader + valid6Coords
+	var cases = []struct {
+		inputStr string
+		err      string
+		numFaces int
+	}{
+		{header + "3 0 1 2\r", "", 1},
+		{header, "unexpected end of file", 0},
+		{header + "3\r", "unexpected end of file", 0},
+		{header + "3 0\r", "unexpected end of file", 0},
+		{header + "3 0 1\r", "unexpected end of file", 0},
+		{header + "2 0 1\r", "a face must have at least 3 indices", 0},
+		{header3 + "3 0 1 2\r3 0 2 3\r3 1 4 2\r", "", 3},
+		{header + "4 0 1 2 3\r", "", 2},
+		{header + "5 0 1 2 3 4\r", "", 3},
+		{header + "6 0 1 2 3 4 5\r", "", 4},
+	}
+	for i, tc := range cases {
+		m := testError(t, i, tc.inputStr, tc.err)
+		if m == nil {
+			continue
+		}
+		if len(m.Tris) != tc.numFaces {
+			t.Errorf("tc %d: expected %d faces, got %d", i+1, tc.numFaces, len(m.Tris))
+		}
+	}
+
+}
+
+func testError(t *testing.T, tc int, mesh, errTest string) *Mesh {
+	m, err := ReadPLY(newReader(mesh))
 	if err == nil && errTest == "" {
-		return
+		return m
 	}
 	if err == nil || Strcmp(errTest, err.Error()) != 0 {
 		errString := "<nil>"
@@ -97,4 +143,5 @@ func testError(t *testing.T, tc int, mesh, errTest string) {
 		t.Errorf("tc %d: Error on testing error response. expected: \"%s\", got \"%s\"",
 			tc+1, errTest, errString)
 	}
+	return m
 }
