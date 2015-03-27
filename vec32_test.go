@@ -1,9 +1,16 @@
 package vec32
 
 import (
+	"io/ioutil"
 	"math"
+	"os"
 	"testing"
 )
+
+func TestMain(m *testing.M) {
+	InitLogging(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	os.Exit(m.Run())
+}
 
 func TestVec2(t *testing.T) {
 	v := Vec2{3, 4}

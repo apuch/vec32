@@ -2,6 +2,7 @@ package vec32
 
 import (
 	"io"
+	"os"
 	"strings"
 	"testing"
 )
@@ -117,6 +118,7 @@ func TestFaces(t *testing.T) {
 		{header + "4 0 1 2 3\r", "", 2},
 		{header + "5 0 1 2 3 4\r", "", 3},
 		{header + "6 0 1 2 3 4 5\r", "", 4},
+		{header + "3 0 1 6\r", "vertex index out of range", 4},
 	}
 	for i, tc := range cases {
 		m := testError(t, i, tc.inputStr, tc.err)
@@ -127,7 +129,37 @@ func TestFaces(t *testing.T) {
 			t.Errorf("tc %d: expected %d faces, got %d", i+1, tc.numFaces, len(m.Tris))
 		}
 	}
+}
 
+func TestRealSamples(t *testing.T) {
+	var cases = []struct {
+		file     string
+		numVerts int
+		numTris  int
+	}{
+		{"paulbourke.net.sample1.ply", 6, 12},
+	}
+	for i, tc := range cases {
+		var f *os.File
+		var err error
+		var m *Mesh
+		if f, err = os.Open("test/ply/" + tc.file); err != nil {
+			t.Errorf("tc %d: could not open file %s: %s ", i, tc.file, err.Error())
+			continue
+		}
+		if m, err = ReadPLY(f); err != nil {
+			t.Errorf("tc %d: unexpected error on reading mesh: %s", i+1, err.Error())
+		}
+		if m == nil {
+			continue
+		}
+		if len(m.Verts) != tc.numVerts {
+			t.Errorf("tc %d: expected %d verts, got %d", i+1, tc.numVerts, len(m.Verts))
+		}
+		if len(m.Tris) != tc.numTris {
+			t.Errorf("tc %d: expected %d faces, got %d", i+1, tc.numTris, len(m.Tris))
+		}
+	}
 }
 
 func testError(t *testing.T, tc int, mesh, errTest string) *Mesh {

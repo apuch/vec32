@@ -94,6 +94,8 @@ func ReadPLY(r io.Reader) (m *Mesh, err error) {
 	}
 	mb.scanner = bufio.NewScanner(mb.rd)
 	mb.scanner.Split(bufio.ScanWords)
+	Info.Printf("Read header, start to read values (%d verts, %d faces)",
+		mb.nVerts, mb.nFaces)
 	mb.mesh.Verts = make([]Vec3, mb.nVerts)
 	mb.mesh.Tris = make([]Triangle, mb.nFaces)
 	if err = mb.readVerts(); err != nil {
@@ -247,7 +249,7 @@ func (mb *meshBuilder) readFaces() error {
 		if cnt < 3 {
 			return newErrorMesh("a face must have at least 3 indices")
 		}
-		var p0, p1, p2 int32
+		var p0, p1, p2 int
 		if p0, err = mb.nextInt(); err != nil {
 			return err
 		}
@@ -258,7 +260,9 @@ func (mb *meshBuilder) readFaces() error {
 			if p2, err = mb.nextInt(); err != nil {
 				return err
 			}
-			mb.addTriangle(p0, p1, p2)
+			if err = mb.addTriangle(p0, p1, p2); err != nil {
+				return err
+			}
 			p1 = p2
 		}
 	}
@@ -266,16 +270,20 @@ func (mb *meshBuilder) readFaces() error {
 	return nil
 }
 
-func (mb *meshBuilder) addTriangle(p0, p1, p2 int32) {
+func (mb *meshBuilder) addTriangle(p0, p1, p2 int) error {
 	if mb.triIdx+1 == cap(mb.mesh.Tris) {
 		tmp := make([]Triangle, 3*cap(mb.mesh.Tris)/2+1)
 		copy(tmp, mb.mesh.Tris)
 		mb.mesh.Tris = tmp
 	}
+	if p0 >= len(mb.mesh.Verts) || p1 >= len(mb.mesh.Verts) || p2 >= len(mb.mesh.Verts) {
+		return newErrorMesh("vertex index out of range")
+	}
 	mb.mesh.Tris[mb.triIdx].P1 = &mb.mesh.Verts[p0]
 	mb.mesh.Tris[mb.triIdx].P2 = &mb.mesh.Verts[p1]
 	mb.mesh.Tris[mb.triIdx].P3 = &mb.mesh.Verts[p2]
 	mb.triIdx += 1
+	return nil
 }
 
 func (mb *meshBuilder) nextFloat() (val float32, err error) {
@@ -290,7 +298,7 @@ func (mb *meshBuilder) nextFloat() (val float32, err error) {
 	return float32(result), nil
 }
 
-func (mb *meshBuilder) nextInt() (val int32, err error) {
+func (mb *meshBuilder) nextInt() (val int, err error) {
 	var token string
 	if token, err = mb.getToken(); err != nil {
 		return 0, err
@@ -299,7 +307,7 @@ func (mb *meshBuilder) nextInt() (val int32, err error) {
 	if result, err = strconv.ParseInt(token, 10, 32); err != nil {
 		return 0, newErrorMesh("could not convert `" + token + "` to int")
 	}
-	return int32(result), nil
+	return int(result), nil
 }
 
 func (mb *meshBuilder) getToken() (token string, err error) {
