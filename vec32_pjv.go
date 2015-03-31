@@ -52,13 +52,15 @@ var propMap = map[string]uint{
 }
 
 var typeMap = map[string]uint{
-	"char":   typeChar,
-	"uchar":  typeUchar,
-	"short":  typeUshort,
-	"int":    typeInt,
-	"uint":   typeUint,
-	"float":  typeFloat,
-	"double": typeDouble,
+	"char":    typeChar,
+	"uchar":   typeUchar,
+	"short":   typeUshort,
+	"int":     typeInt,
+	"uint":    typeUint,
+	"float":   typeFloat,
+	"float32": typeFloat,
+	"float64": typeDouble,
+	"double":  typeDouble,
 }
 
 type meshBuilder struct {

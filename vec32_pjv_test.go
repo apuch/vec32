@@ -139,6 +139,7 @@ func TestRealSamples(t *testing.T) {
 	}{
 		{"paulbourke.net.sample1.ply", 8, 12},
 		{"paulbourke.net.sample2.ply", 8, 12},
+		{"people.sc.fsu.edu.helix.ply", 3240, 6400},
 	}
 	for i, tc := range cases {
 		var f *os.File

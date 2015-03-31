@@ -1,0 +1,4 @@
+sources:
+
+paulbourke.net.*          : http://paulbourke.net/dataformats/ply/
+people.sc.fsu.edu.*       : http://people.sc.fsu.edu/~jburkardt/data/ply/ply.html
