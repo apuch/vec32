@@ -138,6 +138,7 @@ func TestRealSamples(t *testing.T) {
 		numTris  int
 	}{
 		{"paulbourke.net.sample1.ply", 8, 12},
+		{"paulbourke.net.sample2.ply", 8, 12},
 	}
 	for i, tc := range cases {
 		var f *os.File

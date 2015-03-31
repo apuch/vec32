@@ -141,6 +141,8 @@ func (mb *meshBuilder) readHeader() error {
 			if e := mb.readFace(line); e != nil {
 				return e
 			}
+		} else if strings.HasPrefix(line, "element ") {
+			mb.currElement = elementIgnore
 		} else if strings.HasPrefix(line, "property ") {
 			if e := mb.readProperty(line); e != nil {
 				return e
