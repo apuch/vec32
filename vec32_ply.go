@@ -9,16 +9,6 @@ import (
 	"strings"
 )
 
-// Struct holding all informations of a mesh
-//
-// this struct will move somewhere else as soon as we support a second
-// formar. Until then...
-type Mesh struct {
-	// The vertices we have
-	Verts []Vec3
-	Tris  []Triangle
-}
-
 const (
 	typeIgnore = iota
 	typeChar   = iota

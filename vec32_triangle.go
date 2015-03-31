@@ -9,3 +9,9 @@ func (tri *Triangle) OrthoBox(b *OrthoBox) {
 	b.P1.Y = Max(tri.P1.Y, Max(tri.P2.Y, tri.P3.Y))
 	b.P1.Z = Max(tri.P1.Z, Max(tri.P2.Z, tri.P3.Z))
 }
+
+func (tri *Triangle) Center(p *Vec3) {
+	p.X = (tri.P1.X + tri.P2.X + tri.P3.X) / 3.0
+	p.Y = (tri.P1.Y + tri.P2.Y + tri.P3.Y) / 3.0
+	p.Z = (tri.P1.Z + tri.P2.Z + tri.P3.Z) / 3.0
+}
