@@ -40,7 +40,7 @@ func TestHeaderBasic(t *testing.T) {
 		inputStr string
 		errorRsp string
 	}{
-		{"", "EOF"},
+		{"", "unexpected end of file"},
 		{"plx\r", "expected file-magic ply\\r"},
 		{"ply\r" + "format ascii 1.1\r", "only format ascii 1.0 supported"},
 		{headerStart + "foobar baz\r", "unexpected line in header: foobar baz"},
@@ -137,7 +137,7 @@ func TestRealSamples(t *testing.T) {
 		numVerts int
 		numTris  int
 	}{
-		{"paulbourke.net.sample1.ply", 6, 12},
+		{"paulbourke.net.sample1.ply", 8, 12},
 	}
 	for i, tc := range cases {
 		var f *os.File

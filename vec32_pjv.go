@@ -2,6 +2,7 @@ package vec32
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -89,10 +90,11 @@ func ReadPLY(r io.Reader) (m *Mesh, err error) {
 	mb.mesh = &Mesh{}
 	mb.vertProp = make([]property, 64)
 	mb.faceProp = make([]property, 64)
+	mb.scanner = bufio.NewScanner(mb.rd)
+	mb.scanner.Split(scanLines)
 	if err = mb.readHeader(); err != nil {
 		return nil, err
 	}
-	mb.scanner = bufio.NewScanner(mb.rd)
 	mb.scanner.Split(bufio.ScanWords)
 	Info.Printf("Read header, start to read values (%d verts, %d faces)",
 		mb.nVerts, mb.nFaces)
@@ -108,26 +110,26 @@ func ReadPLY(r io.Reader) (m *Mesh, err error) {
 }
 
 func (mb *meshBuilder) readHeader() error {
-	line, err := mb.rd.ReadString('\r')
-	if err != nil {
-		return newErrorMesh(err.Error())
+	var line string
+	var err error
+	if line, err = mb.nextLine(); err != nil {
+		return err
 	}
-	if line != "ply\r" {
+	if line != "ply" {
 		return newErrorMesh("expected file-magic ply\\r")
 	}
-	line, err = mb.rd.ReadString('\r')
-	if err != nil {
-		return newErrorMesh(err.Error())
+	if line, err = mb.nextLine(); err != nil {
+		return err
 	}
-	if line != "format ascii 1.0\r" {
+	if line != "format ascii 1.0" {
 		return newErrorMesh("only format ascii 1.0 supported")
 	}
 	for {
-		line, err = mb.rd.ReadString('\r')
+		line, err = mb.nextLine()
 		if err != nil {
 			return newErrorMesh(err.Error())
 		}
-		if line == "end_header\r" {
+		if line == "end_header" {
 			return mb.validateHeader()
 		} else if strings.HasPrefix(line, "comment ") {
 			// pass
@@ -286,6 +288,14 @@ func (mb *meshBuilder) addTriangle(p0, p1, p2 int) error {
 	return nil
 }
 
+func (mb *meshBuilder) nextLine() (val string, err error) {
+	if !mb.scanner.Scan() {
+		return "", newErrorMesh("unexpected end of file")
+	}
+	//Trace.Printf(strings.Trim(mb.scanner.Text(), " \t\r\n"))
+	return strings.Trim(mb.scanner.Text(), " \t\r\n"), nil
+}
+
 func (mb *meshBuilder) nextFloat() (val float32, err error) {
 	var token string
 	if token, err = mb.getToken(); err != nil {
@@ -354,4 +364,31 @@ func Strcmp(a, b string) int {
 		diff = len(a) - len(b)
 	}
 	return diff
+}
+
+// copied and modified from src/bufio/scan.go
+func scanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+	if i := bytes.IndexByte(data, '\n'); i >= 0 {
+		// We have a full newline-terminated line.
+		return i + 1, dropCR(data[0:i]), nil
+	}
+	if i := bytes.IndexByte(data, '\r'); i >= 0 {
+		return i + 1, data[0:i], nil
+	}
+	// If we're at EOF, we have a final, non-terminated line. Return it.
+	if atEOF {
+		return len(data), dropCR(data), nil
+	}
+	// Request more data.
+	return 0, nil, nil
+}
+
+func dropCR(data []byte) []byte {
+	if len(data) > 0 && data[len(data)-1] == '\r' {
+		return data[0 : len(data)-1]
+	}
+	return data
 }
