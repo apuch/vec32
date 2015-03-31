@@ -45,8 +45,9 @@ func TestIntersect(t *testing.T) {
 	}
 }
 
-func testOrthoBox(t *testing.T, i int, obj Object, p0, p1 *Vec3) {
-	box := obj.OrthoBox()
+func testOrthoBox(t *testing.T, i int, obj *Triangle, p0, p1 *Vec3) {
+	var box OrthoBox
+	obj.OrthoBox(&box)
 	if !AlmostEqual3(p0, &box.P0) {
 		t.Errorf("tc %d: Minimum failed - exp: %s cur: %s", i,
 			p0.String(), box.P0.String())
