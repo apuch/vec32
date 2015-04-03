@@ -75,6 +75,13 @@ func (bb *OrthoBox) Add(bb2 *OrthoBox) {
 	bb.P1.Z = Max(bb.P1.Z, bb2.P1.Z)
 }
 
+func (bb *OrthoBox) Area() float32 {
+	dx := bb.P1.X - bb.P0.X
+	dy := bb.P1.Y - bb.P0.Y
+	dz := bb.P1.Z - bb.P0.Z
+	return 2 * (dx*dy + dx*dz + dy*dz)
+}
+
 func init() {
 	INF = Inf(1)
 	INF_NEG = Inf(-1)
