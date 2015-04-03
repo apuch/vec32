@@ -5,14 +5,25 @@ import (
 	"testing"
 )
 
-func TestBB(t *testing.T) {
-	bvh, e := buildBVH(t, 0, "paulbourke.net.sample1.ply")
-	if e != nil {
-		return
+func TestBasic(t *testing.T) {
+	var cases = []struct {
+		file string
+		bb   OrthoBox
+		cost float32
+	}{
+		{"paulbourke.net.sample1.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, 12 * 6},
 	}
-	bb := bvh.OrthoBox()
-	testBVHOrthoBox(t, 1, &OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, &bb)
-
+	for i, tc := range cases {
+		bvh, e := buildBVH(t, i, tc.file)
+		if e != nil {
+			continue
+		}
+		bb := bvh.OrthoBox()
+		testBVHOrthoBox(t, 1, &tc.bb, &bb)
+		if bvh.Cost() != tc.cost {
+			t.Errorf("Expected a cost of %f, got %f", tc.cost, bvh.Cost())
+		}
+	}
 }
 
 func testBVHOrthoBox(t *testing.T, i int, exp, cur *OrthoBox) {
