@@ -40,8 +40,9 @@ func TestSimpleSplit(t *testing.T) {
 	}{
 		// cuts of the first side
 		{"paulbourke.net.sample1.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, 64},
-		// as expected - split two cubes
-		{"two_cubes.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{4, 1, 1}}, 2 * 12 * 6},
+		{"two_cubes.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{4, 1, 1}}, 88},
+		{"two_cubes_y.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 4, 1}}, 128},
+		{"two_cubes_z.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 4}}, 128},
 	}
 	for i, tc := range cases {
 		bvh, e := buildBVH(t, i, tc.file, opts)
