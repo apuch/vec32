@@ -6,15 +6,45 @@ import (
 )
 
 func TestBasic(t *testing.T) {
+	opts := NewBVHDefaultOptions()
+	opts.TraversalCost = INF // no split at all
+
 	var cases = []struct {
 		file string
 		bb   OrthoBox
 		cost float32
 	}{
 		{"paulbourke.net.sample1.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, 12 * 6},
+		{"two_cubes.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{4, 1, 1}}, 24 * 18},
 	}
 	for i, tc := range cases {
-		bvh, e := buildBVH(t, i, tc.file)
+		bvh, e := buildBVH(t, i, tc.file, opts)
+		if e != nil {
+			continue
+		}
+		bb := bvh.OrthoBox()
+		testBVHOrthoBox(t, 1, &tc.bb, &bb)
+		if bvh.Cost() != tc.cost {
+			t.Errorf("Expected a cost of %f, got %f", tc.cost, bvh.Cost())
+		}
+	}
+}
+
+func TestSimpleSplit(t *testing.T) {
+	opts := NewBVHDefaultOptions()
+
+	var cases = []struct {
+		file string
+		bb   OrthoBox
+		cost float32
+	}{
+		// cuts of the first side
+		{"paulbourke.net.sample1.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, 64},
+		// as expected - split two cubes
+		{"two_cubes.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{4, 1, 1}}, 2 * 12 * 6},
+	}
+	for i, tc := range cases {
+		bvh, e := buildBVH(t, i, tc.file, opts)
 		if e != nil {
 			continue
 		}
@@ -32,14 +62,14 @@ func testBVHOrthoBox(t *testing.T, i int, exp, cur *OrthoBox) {
 	}
 }
 
-func buildBVH(t *testing.T, i int, filename string) (*BVHTree, error) {
+func buildBVH(t *testing.T, i int, filename string, opts *BVHBuildOptions) (*BVHTree, error) {
 	var e error
 	var m *Mesh
 	if m, e = getMesh(t, i, filename); e != nil {
 		return nil, e
 	}
 	var bvh *BVHTree
-	if bvh, e = NewBVHTree(m, nil); e != nil {
+	if bvh, e = NewBVHTree(m, opts); e != nil {
 		t.Errorf("tc %d: error on creating mesh: `%s`", i, e.Error())
 		return nil, e
 	}

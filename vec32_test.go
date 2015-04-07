@@ -1,14 +1,15 @@
 package vec32
 
 import (
-	"io/ioutil"
+	//"io/ioutil"
 	"math"
 	"os"
 	"testing"
 )
 
 func TestMain(m *testing.M) {
-	InitLogging(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	//InitLogging(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	InitLogging(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
 	os.Exit(m.Run())
 }
 
