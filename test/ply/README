@@ -2,3 +2,7 @@ sources:
 
 paulbourke.net.*          : http://paulbourke.net/dataformats/ply/
 people.sc.fsu.edu.*       : http://people.sc.fsu.edu/~jburkardt/data/ply/ply.html
+
+When ply-files are modified versions of 3rd party PLY files, the source is mentioned
+as a comment
+
