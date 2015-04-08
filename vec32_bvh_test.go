@@ -44,6 +44,7 @@ func TestSimpleSplit(t *testing.T) {
 		{"two_cubes_y.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 4, 1}}, 128},
 		{"two_cubes_2y.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 8, 1}}, 192},
 		{"two_cubes_z.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 4}}, 128},
+		{"people.sc.fsu.edu.helix.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 4}}, 128},
 	}
 	for i, tc := range cases {
 		bvh, _ := buildBVH(t, i, tc.file, opts)

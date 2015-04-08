@@ -146,7 +146,7 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 	bb = bins[BIN_COUNT-1].bb
 	for i := BIN_COUNT - 2; i >= 0; i-- {
 		if bins[i].cnt == 0 {
-			costLeft[i] = INF
+			costRight[i] = INF
 			continue
 		}
 		bb.Add(&bins[i].bb)
@@ -167,8 +167,8 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 	bestCost += bvhb.bvh.Opt.TraversalCost
 
 	selfCost := float32(len(n.tris)) * n.bb.Area()
-	if bestCost > selfCost {
-		//Trace.Printf("best cost: %f - self cost: %f -> no split", bestCost, selfCost)
+	if bestCost >= selfCost {
+		Trace.Printf("best cost: %f - self cost: %f -> no split", bestCost, selfCost)
 		return
 	}
 
@@ -259,9 +259,15 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 		tris: n.tris[posRight+1 : len(n.tris)],
 		bb:   bbRight,
 	}
-	//Trace.Printf("split at %f (bin %d) - tris: %d vs. %d boxes: %s vs %s",
-	//	bestCost, bestCostIdx, len(n.left.tris), len(n.right.tris),
-	//	bbLeft.String(), bbRight.String())
+	Trace.Printf("split for cost %f at bin %d [%t;%t;%t] - tris: %d vs. %d boxes: %s vs %s",
+		bestCost, bestCostIdx, splitX, splitY, splitZ, len(n.left.tris), len(n.right.tris),
+		bbLeft.String(), bbRight.String())
+	for i := 0; i < BIN_COUNT-1; i++ {
+		Trace.Printf("Split %d: %f + %f", i, costLeft[i], costRight[i])
+	}
+	for i := 0; i < BIN_COUNT; i++ {
+		Trace.Printf("Bin %d: %s * %d", i, bins[i].bb.String(), bins[i].cnt)
+	}
 }
 
 // get the bounding box
