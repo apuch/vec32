@@ -42,11 +42,12 @@ func TestSimpleSplit(t *testing.T) {
 		{"paulbourke.net.sample1.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, 64},
 		{"two_cubes.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{4, 1, 1}}, 88},
 		{"two_cubes_y.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 4, 1}}, 128},
+		{"two_cubes_2y.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 8, 1}}, 192},
 		{"two_cubes_z.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 4}}, 128},
 	}
 	for i, tc := range cases {
-		bvh, e := buildBVH(t, i, tc.file, opts)
-		if e != nil {
+		bvh, _ := buildBVH(t, i, tc.file, opts)
+		if bvh == nil {
 			continue
 		}
 		bb := bvh.OrthoBox()
@@ -87,6 +88,7 @@ func getMesh(t *testing.T, i int, fileName string) (*Mesh, error) {
 	}
 	if m, err = ReadPLY(f); err != nil {
 		t.Errorf("tc %d: unexpected error on reading mesh: %s", i+1, err.Error())
+		return nil, err
 	}
 	return m, nil
 }
