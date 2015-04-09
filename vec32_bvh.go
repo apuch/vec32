@@ -94,44 +94,20 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 		return
 	}
 	dist := n.bb.P1.Sub(&n.bb.P0)
+	dimVec := getDimVec(&n.bb)
 
 	var bins [BIN_COUNT]bvhBin
 	for i := 0; i < BIN_COUNT; i++ {
 		bins[i].bb = ORTHO_EMPTY
 	}
 
-	var k0, k1 float32
+	k1 := BIN_COUNT * (1 - 10*EPS) / dist.Dot(&dimVec)
+	k0 := n.bb.P0.Dot(&dimVec)
 
-	splitX := dist.X >= dist.Y && dist.X >= dist.Z && dist.X > 10*EPS
-	splitY := dist.Y >= dist.X && dist.Y >= dist.Z && dist.Y > 10*EPS
-	splitZ := dist.Z >= dist.X && dist.Z >= dist.Y && dist.Z > 10*EPS
-	if !splitX && !splitY && !splitZ {
-		return
-	}
-	if splitX {
-		k1 = BIN_COUNT * (1 - 10*EPS) / dist.X
-		k0 = n.bb.P0.X
-		for _, idx := range n.tris {
-			bin := int(k1 * (bvhb.nodes[idx].p.X - k0))
-			bins[bin].cnt += 1
-			bins[bin].bb.Add(&bvhb.nodes[idx].bb)
-		}
-	} else if splitY {
-		k1 = BIN_COUNT * (1 - 10*EPS) / dist.Y
-		k0 = n.bb.P0.Y
-		for _, idx := range n.tris {
-			bin := int(k1 * (bvhb.nodes[idx].p.Y - k0))
-			bins[bin].cnt += 1
-			bins[bin].bb.Add(&bvhb.nodes[idx].bb)
-		}
-	} else if splitZ {
-		k1 = BIN_COUNT * (1 - 10*EPS) / dist.Z
-		k0 = n.bb.P0.Z
-		for _, idx := range n.tris {
-			bin := int(k1 * (bvhb.nodes[idx].p.Z - k0))
-			bins[bin].cnt += 1
-			bins[bin].bb.Add(&bvhb.nodes[idx].bb)
-		}
+	for _, idx := range n.tris {
+		bin := int(k1 * (bvhb.nodes[idx].p.Dot(&dimVec) - k0))
+		bins[bin].cnt += 1
+		bins[bin].bb.Add(&bvhb.nodes[idx].bb)
 	}
 
 	var costLeft, costRight [BIN_COUNT]float32
@@ -182,91 +158,33 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 	bbLeft := ORTHO_EMPTY
 	bbRight := ORTHO_EMPTY
 
-	if splitX {
-		for posLeft <= posRight {
-			for ; posLeft < len(n.tris) && posLeft <= posRight; posLeft += 1 {
-				bin := int(k1 * (bvhb.nodes[n.tris[posLeft]].p.X - k0))
-				if bin > bestCostIdx {
-					break
-				}
-				bbLeft.Add(&bvhb.nodes[n.tris[posLeft]].bb)
+	for posLeft <= posRight {
+		for ; posLeft < len(n.tris) && posLeft <= posRight; posLeft += 1 {
+			bin := int(k1 * (bvhb.nodes[n.tris[posLeft]].p.Dot(&dimVec) - k0))
+			if bin > bestCostIdx {
+				break
 			}
-			for ; posRight > posLeft-1 && posRight >= 0; posRight -= 1 {
-				bin := int(k1 * (bvhb.nodes[n.tris[posRight]].p.X - k0))
-				if bin <= bestCostIdx {
-					break
-				}
-				bbRight.Add(&bvhb.nodes[n.tris[posRight]].bb)
-			}
-			if posLeft < posRight {
-				tmp := n.tris[posLeft]
-				n.tris[posLeft] = n.tris[posRight]
-				n.tris[posRight] = tmp
-
-				bbLeft.Add(&bvhb.nodes[n.tris[posLeft]].bb)
-				bbRight.Add(&bvhb.nodes[n.tris[posRight]].bb)
-
-				posLeft += 1
-				posRight -= 1
-			} else if posLeft == posRight {
-				// implement me
-			}
+			bbLeft.Add(&bvhb.nodes[n.tris[posLeft]].bb)
 		}
-	} else if splitY {
-		for posLeft <= posRight {
-			for ; posLeft < len(n.tris) && posLeft <= posRight; posLeft += 1 {
-				bin := int(k1 * (bvhb.nodes[n.tris[posLeft]].p.Y - k0))
-				if bin > bestCostIdx {
-					break
-				}
-				bbLeft.Add(&bvhb.nodes[n.tris[posLeft]].bb)
+		for ; posRight > posLeft-1 && posRight >= 0; posRight -= 1 {
+			bin := int(k1 * (bvhb.nodes[n.tris[posRight]].p.Dot(&dimVec) - k0))
+			if bin <= bestCostIdx {
+				break
 			}
-			for ; posRight > posLeft-1 && posRight >= 0; posRight -= 1 {
-				bin := int(k1 * (bvhb.nodes[n.tris[posRight]].p.Y - k0))
-				if bin <= bestCostIdx {
-					break
-				}
-				bbRight.Add(&bvhb.nodes[n.tris[posRight]].bb)
-			}
-			if posLeft < posRight {
-				tmp := n.tris[posLeft]
-				n.tris[posLeft] = n.tris[posRight]
-				n.tris[posRight] = tmp
-
-				bbLeft.Add(&bvhb.nodes[n.tris[posLeft]].bb)
-				bbRight.Add(&bvhb.nodes[n.tris[posRight]].bb)
-
-				posLeft += 1
-				posRight -= 1
-			}
+			bbRight.Add(&bvhb.nodes[n.tris[posRight]].bb)
 		}
-	} else if splitZ {
-		for posLeft <= posRight {
-			for ; posLeft < len(n.tris) && posLeft <= posRight; posLeft += 1 {
-				bin := int(k1 * (bvhb.nodes[n.tris[posLeft]].p.Z - k0))
-				if bin > bestCostIdx {
-					break
-				}
-				bbLeft.Add(&bvhb.nodes[n.tris[posLeft]].bb)
-			}
-			for ; posRight > posLeft-1 && posRight >= 0; posRight -= 1 {
-				bin := int(k1 * (bvhb.nodes[n.tris[posRight]].p.Z - k0))
-				if bin <= bestCostIdx {
-					break
-				}
-				bbRight.Add(&bvhb.nodes[n.tris[posRight]].bb)
-			}
-			if posLeft < posRight {
-				tmp := n.tris[posLeft]
-				n.tris[posLeft] = n.tris[posRight]
-				n.tris[posRight] = tmp
+		if posLeft < posRight {
+			tmp := n.tris[posLeft]
+			n.tris[posLeft] = n.tris[posRight]
+			n.tris[posRight] = tmp
 
-				bbLeft.Add(&bvhb.nodes[n.tris[posLeft]].bb)
-				bbRight.Add(&bvhb.nodes[n.tris[posRight]].bb)
+			bbLeft.Add(&bvhb.nodes[n.tris[posLeft]].bb)
+			bbRight.Add(&bvhb.nodes[n.tris[posRight]].bb)
 
-				posLeft += 1
-				posRight -= 1
-			}
+			posLeft += 1
+			posRight -= 1
+		} else if posLeft == posRight {
+			// implement me
 		}
 	}
 
@@ -280,9 +198,9 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 	}
 
 	return
-	Trace.Printf("split for cost %f (%.2f%%) at %f (bin %d) [%t;%t;%t] - tris: %d vs. %d",
+	Trace.Printf("split for cost %f (%.2f%%) at %f (bin %d) [dim: %s] - tris: %d vs. %d",
 		bestCost, bestCost*100.0/selfCost, float32(bestCostIdx+1)/k1+k0, bestCostIdx,
-		splitX, splitY, splitZ, len(n.left.tris), len(n.right.tris))
+		dimVec.String(), len(n.left.tris), len(n.right.tris))
 	Trace.Printf("selfCost: %f selfBB: %s", selfCost, n.bb.String())
 	Trace.Printf("posLeft: %d posRight: %d len(n.Tris): %d k0: %f k1: %f", posLeft, posRight, len(n.tris), k0, k1)
 	if len(n.tris) == 5 {
@@ -301,6 +219,19 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 		Trace.Printf("Bin %d: %s * %d", i, bins[i].bb.String(), bins[i].cnt)
 	}
 
+}
+
+func getDimVec(bb *OrthoBox) Vec3 {
+	dist := bb.P1.Sub(&bb.P0)
+	if dist.X >= dist.Y && dist.X >= dist.Z && dist.X > 10*EPS {
+		return Vec3{1, 0, 0}
+	} else if dist.Y >= dist.X && dist.Y >= dist.Z && dist.Y > 10*EPS {
+		return Vec3{0, 1, 0}
+	} else if dist.Z >= dist.X && dist.Z >= dist.Y && dist.Z > 10*EPS {
+		return Vec3{0, 0, 1}
+	} else {
+		return Vec3{0, 0, 0}
+	}
 }
 
 // get the bounding box
