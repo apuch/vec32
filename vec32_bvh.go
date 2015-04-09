@@ -173,7 +173,7 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 
 	selfCost := float32(len(n.tris)) * n.bb.Area()
 	if bestCost >= selfCost {
-		//Trace.Printf("best cost: %f - self cost: %f -> no split", bestCost, selfCost)
+		// always gets "itself" as bestCost
 		return
 	}
 
@@ -280,10 +280,9 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 	}
 
 	return
-	Trace.Printf("split for cost %f at %f (bin %d) [%t;%t;%t] - tris: %d vs. %d boxes: %s vs %s",
-		bestCost, float32(bestCostIdx+1)/k1+k0, bestCostIdx, splitX, splitY, splitZ,
-		len(n.left.tris), len(n.right.tris),
-		bbLeft.String(), bbRight.String())
+	Trace.Printf("split for cost %f (%.2f%%) at %f (bin %d) [%t;%t;%t] - tris: %d vs. %d",
+		bestCost, bestCost*100.0/selfCost, float32(bestCostIdx+1)/k1+k0, bestCostIdx,
+		splitX, splitY, splitZ, len(n.left.tris), len(n.right.tris))
 	Trace.Printf("selfCost: %f selfBB: %s", selfCost, n.bb.String())
 	Trace.Printf("posLeft: %d posRight: %d len(n.Tris): %d k0: %f k1: %f", posLeft, posRight, len(n.tris), k0, k1)
 	if len(n.tris) == 5 {
