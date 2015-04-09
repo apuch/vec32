@@ -9,7 +9,7 @@ import (
 
 func TestMain(m *testing.M) {
 	//InitLogging(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
-	InitLogging(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
+	//InitLogging(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
 	os.Exit(m.Run())
 }
 

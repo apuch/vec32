@@ -2,6 +2,7 @@ package vec32
 
 import (
 	"fmt"
+	"io/ioutil"
 )
 
 var INF float32
@@ -86,6 +87,7 @@ func init() {
 	INF = Inf(1)
 	INF_NEG = Inf(-1)
 	ORTHO_EMPTY = OrthoBox{Vec3{INF, INF, INF}, Vec3{INF_NEG, INF_NEG, INF_NEG}}
+	InitLogging(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
 }
 
 func (tri *Triangle) String() string {
