@@ -33,6 +33,8 @@ type bvhBuilder struct {
 
 const BIN_COUNT = 12
 
+const DEBUG_LOG = 3
+
 // create a new BVH Tree
 func NewBVHTree(m *Mesh, opt *BVHBuildOptions) (*BVHTree, error) {
 	if opt == nil {
@@ -90,11 +92,29 @@ func (bvhb *bvhBuilder) doSplits(n *bvhNode) {
 }
 
 func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
+	if DEBUG_LOG > 0 {
+		Trace.Println("==========================================================")
+		Trace.Printf("bb: %s objs: %d cost: %f", n.bb.String(), len(n.tris),
+			n.bb.Area()*float32(len(n.tris)))
+	}
+	if DEBUG_LOG > 2 {
+		for t := 0; t < len(n.tris); t++ {
+			tri := bvhb.m.Tris[n.tris[t]]
+			var bb OrthoBox
+			tri.OrthoBox(&bb)
+			Trace.Printf("tri %d: %s P0: %s", t, bb.String(),
+				bvhb.nodes[n.tris[t]].p.String())
+		}
+	}
+
 	if len(n.tris) < bvhb.bvh.Opt.TrisPerNodeMin {
 		return
 	}
 	dist := n.bb.P1.Sub(&n.bb.P0)
 	dimVec := getDimVec(&n.bb)
+	if dimVec.LengthSq() == 0 {
+		return
+	}
 
 	var bins [BIN_COUNT]bvhBin
 	for i := 0; i < BIN_COUNT; i++ {
@@ -135,6 +155,13 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 		}
 	}
 
+	if DEBUG_LOG > 1 {
+		for i := 0; i < BIN_COUNT; i++ {
+			Trace.Printf("Bin %d: %s * %d cost left: %f right: %f",
+				i, bins[i].bb.String(), bins[i].cnt, costLeft[i], costRight[i])
+		}
+	}
+
 	bestCost := INF
 	bestCostIdx := 0
 	for i := 0; i < BIN_COUNT-1; i++ {
@@ -149,7 +176,9 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 
 	selfCost := float32(len(n.tris)) * n.bb.Area()
 	if bestCost >= selfCost {
-		// always gets "itself" as bestCost
+		if DEBUG_LOG > 0 {
+			Trace.Println("Split isn't worth it")
+		}
 		return
 	}
 
@@ -184,7 +213,7 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 			posLeft += 1
 			posRight -= 1
 		} else if posLeft == posRight {
-			// implement me
+			Error.Println("posLeft == posRight - that should not happen")
 		}
 	}
 
@@ -197,28 +226,12 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 		bb:   bbRight,
 	}
 
-	return
-	Trace.Printf("split for cost %f (%.2f%%) at %f (bin %d) [dim: %s] - tris: %d vs. %d",
-		bestCost, bestCost*100.0/selfCost, float32(bestCostIdx+1)/k1+k0, bestCostIdx,
-		dimVec.String(), len(n.left.tris), len(n.right.tris))
-	Trace.Printf("selfCost: %f selfBB: %s", selfCost, n.bb.String())
-	Trace.Printf("posLeft: %d posRight: %d len(n.Tris): %d k0: %f k1: %f", posLeft, posRight, len(n.tris), k0, k1)
-	if len(n.tris) == 5 {
-		for t := 0; t < len(n.tris); t++ {
-			tri := bvhb.m.Tris[n.tris[t]]
-			var bb OrthoBox
-			tri.OrthoBox(&bb)
-			Trace.Printf("tri %d: %s P0: %s", t, bb.String(), bvhb.nodes[n.tris[t]].p.String())
-		}
+	if DEBUG_LOG > 0 {
+		Trace.Printf("split for cost %f (%.2f%%) at %f (bin %d) "+
+			"[dim: %s] - tris: %d vs. %d",
+			bestCost, bestCost*100.0/selfCost, float32(bestCostIdx+1)/k1+k0, bestCostIdx,
+			dimVec.String(), len(n.left.tris), len(n.right.tris))
 	}
-
-	for i := 0; i < BIN_COUNT; i++ {
-		Trace.Printf("Split %d: left: %f + right %f", i, costLeft[i], costRight[i])
-	}
-	for i := 0; i < BIN_COUNT; i++ {
-		Trace.Printf("Bin %d: %s * %d", i, bins[i].bb.String(), bins[i].cnt)
-	}
-
 }
 
 func getDimVec(bb *OrthoBox) Vec3 {
