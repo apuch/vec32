@@ -16,6 +16,7 @@ func TestBasic(t *testing.T) {
 	}{
 		{"paulbourke.net.sample1.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, 12 * 6},
 		{"two_cubes.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{4, 1, 1}}, 24 * 18},
+		{"people.sc.fsu.edu.helix.ply", OrthoBox{Vec3{-23.75, -44.6, -30.25}, Vec3{36.75, 47.65, 30.25}}, 189728000.000000},
 	}
 	for i, tc := range cases {
 		bvh, e := buildBVH(t, i, tc.file, opts)
@@ -44,7 +45,7 @@ func TestSimpleSplit(t *testing.T) {
 		{"two_cubes_y.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 4, 1}}, 128},
 		{"two_cubes_2y.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 8, 1}}, 192},
 		{"two_cubes_z.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 4}}, 128},
-		{"people.sc.fsu.edu.helix.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 4}}, 128},
+		{"people.sc.fsu.edu.helix.ply", OrthoBox{Vec3{-23.75, -44.6, -30.25}, Vec3{36.75, 47.65, 30.25}}, 128},
 	}
 	for i, tc := range cases {
 		bvh, _ := buildBVH(t, i, tc.file, opts)
@@ -54,7 +55,7 @@ func TestSimpleSplit(t *testing.T) {
 		bb := bvh.OrthoBox()
 		testBVHOrthoBox(t, 1, &tc.bb, &bb)
 		if bvh.Cost() != tc.cost {
-			t.Errorf("Expected a cost of %f, got %f", tc.cost, bvh.Cost())
+			t.Errorf("tc %d: Expected a cost of %f, got %f", i, tc.cost, bvh.Cost())
 		}
 	}
 }

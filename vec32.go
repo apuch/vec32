@@ -87,3 +87,7 @@ func init() {
 	INF_NEG = Inf(-1)
 	ORTHO_EMPTY = OrthoBox{Vec3{INF, INF, INF}, Vec3{INF_NEG, INF_NEG, INF_NEG}}
 }
+
+func (tri *Triangle) String() string {
+	return fmt.Sprintf("[%s-%s-%s]", tri.P1, tri.P2, tri.P3)
+}
