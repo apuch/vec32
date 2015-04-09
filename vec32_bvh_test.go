@@ -60,7 +60,7 @@ func TestSimpleSplit(t *testing.T) {
 	}
 }
 
-func BenchmarkHello(b *testing.B) {
+func BenchmarkBVHBuilding(b *testing.B) {
 	m, _ := getMesh(nil, 0, "people.sc.fsu.edu.helix.ply")
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
