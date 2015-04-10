@@ -105,6 +105,25 @@ func TestCross(t *testing.T) {
 	testVec3(t, "crossProduct", c, v3_1.Cross(&v3_2))
 }
 
+func TestOrthoBoxArea(t *testing.T) {
+	var cases = []struct {
+		bb   OrthoBox
+		area float32
+	}{
+		{OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, 6},
+		{OrthoBox{Vec3{1, 1, 1}, Vec3{1, 1, 1}}, 0},
+		{OrthoBox{Vec3{1, 1, 1}, Vec3{2, 2, 2}}, 6},
+		{OrthoBox{Vec3{1, 1, 1}, Vec3{5, 2, 2}}, 18},
+		{OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 0}}, 2},
+	}
+	for i, tc := range cases {
+		area := tc.bb.Area()
+		if area != tc.area {
+			t.Errorf("tc %d: expected area: %f current area: %f", i, tc.area, area)
+		}
+	}
+}
+
 var (
 	v2_1 = Vec2{3, 4}
 	v2_2 = Vec2{5, 6}
