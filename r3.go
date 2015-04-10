@@ -14,6 +14,13 @@ func (v *Vec3) Dim() int { return 3 }
 
 // The euklidian length
 func (v *Vec3) Length() float32 {
+	return LengthR3(v)
+}
+
+// the euklidian length
+func LengthR3(v *Vec3) float32
+
+func lengthR3(v *Vec3) float32 {
 	return Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
 }
 

@@ -46,15 +46,29 @@ func TestCross(t *testing.T) {
 	testVec3(t, "crossProduct", c, *v3_1.Cross(&v3_2))
 }
 
-func BenchmarkAdd3(b *testing.B) {
+func BenchmarkR3Add(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		v3_1.Add(&v3_2)
 	}
 }
 
-func BenchmarkAdd3E(b *testing.B) {
+func BenchmarkR3AddE(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Add3(&v3_1, &v3_2, &v3_3)
+	}
+}
+
+func BenchmarkR3LengthSqNative(b *testing.B) {
+	v := NewVec3(3, 4, 5)
+	for i := 0; i < b.N; i++ {
+		LengthR3(&v)
+	}
+}
+
+func BenchmarkR3LengthSq(b *testing.B) {
+	v := NewVec3(3, 4, 5)
+	for i := 0; i < b.N; i++ {
+		lengthR3(&v)
 	}
 }
 
