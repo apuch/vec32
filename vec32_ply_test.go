@@ -94,7 +94,9 @@ func TestVerts(t *testing.T) {
 	if len(m.Verts) != 2 {
 		t.Errorf("Expected 2 verts, got %d", len(m.Verts))
 	}
-	if !m.Verts[0].IsEqual(&Vec3{1, 2, 3}) || !m.Verts[1].IsEqual(&Vec3{4, 5, 6}) {
+	p0 := NewVec3(1, 2, 3)
+	p1 := NewVec3(4, 5, 6)
+	if !m.Verts[0].IsEqual(&p0) || !m.Verts[1].IsEqual(&p1) {
 		t.Errorf("read wrong vectors (%s and %s)",
 			m.Verts[0].String(), m.Verts[1].String())
 	}

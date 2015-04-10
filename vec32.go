@@ -24,7 +24,7 @@ type Vec2 struct {
 
 // A three dimensional Vector
 type Vec3 struct {
-	X, Y, Z float32
+	X, Y, Z, pad float32
 }
 
 // Triangle in R3
@@ -86,7 +86,7 @@ func (bb *OrthoBox) Area() float32 {
 func init() {
 	INF = Inf(1)
 	INF_NEG = Inf(-1)
-	ORTHO_EMPTY = OrthoBox{Vec3{INF, INF, INF}, Vec3{INF_NEG, INF_NEG, INF_NEG}}
+	ORTHO_EMPTY = OrthoBox{NewVec3(INF, INF, INF), NewVec3(INF_NEG, INF_NEG, INF_NEG)}
 	InitLogging(ioutil.Discard, ioutil.Discard, ioutil.Discard, ioutil.Discard)
 }
 

@@ -14,9 +14,9 @@ func TestBasic(t *testing.T) {
 		bb   OrthoBox
 		cost float32
 	}{
-		{"paulbourke.net.sample1.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, 12 * 6},
-		{"two_cubes.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{4, 1, 1}}, 24 * 18},
-		{"people.sc.fsu.edu.helix.ply", OrthoBox{Vec3{-23.75, -44.6, -30.25}, Vec3{36.75, 47.65, 30.25}}, 189728000.000000},
+		{"paulbourke.net.sample1.ply", OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 1, 1)}, 12 * 6},
+		{"two_cubes.ply", OrthoBox{NewVec3(0, 0, 0), NewVec3(4, 1, 1)}, 24 * 18},
+		{"people.sc.fsu.edu.helix.ply", OrthoBox{NewVec3(-23.75, -44.6, -30.25), NewVec3(36.75, 47.65, 30.25)}, 189728000.000000},
 	}
 	for i, tc := range cases {
 		bvh, e := buildBVH(t, i, tc.file, opts)
@@ -40,12 +40,12 @@ func TestSimpleSplit(t *testing.T) {
 		cost float32
 	}{
 		// cuts of the first side
-		{"paulbourke.net.sample1.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, 56},
-		{"two_cubes.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{4, 1, 1}}, 112},
-		{"two_cubes_y.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 4, 1}}, 112},
-		{"two_cubes_2y.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 8, 1}}, 176},
-		{"two_cubes_z.ply", OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 4}}, 112},
-		{"people.sc.fsu.edu.helix.ply", OrthoBox{Vec3{-23.75, -44.6, -30.25}, Vec3{36.75, 47.65, 30.25}}, 258309.718750},
+		{"paulbourke.net.sample1.ply", OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 1, 1)}, 56},
+		{"two_cubes.ply", OrthoBox{NewVec3(0, 0, 0), NewVec3(4, 1, 1)}, 112},
+		{"two_cubes_y.ply", OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 4, 1)}, 112},
+		{"two_cubes_2y.ply", OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 8, 1)}, 176},
+		{"two_cubes_z.ply", OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 1, 4)}, 112},
+		{"people.sc.fsu.edu.helix.ply", OrthoBox{NewVec3(-23.75, -44.6, -30.25), NewVec3(36.75, 47.65, 30.25)}, 258309.718750},
 	}
 	for i, tc := range cases {
 		bvh, _ := buildBVH(t, i, tc.file, opts)

@@ -4,6 +4,11 @@ import (
 	"fmt"
 )
 
+// Create a new Vector
+func NewVec3(x, y, z float32) Vec3 {
+	return Vec3{x, y, z, 0}
+}
+
 // Dimension of the vector
 func (v *Vec3) Dim() int { return 3 }
 
@@ -29,7 +34,7 @@ func (v *Vec3) Dot(v2 *Vec3) float32 {
 
 // Add two vectors
 func (v *Vec3) Add(v2 *Vec3) *Vec3 {
-	return &Vec3{v.X + v2.X, v.Y + v2.Y, v.Z + v2.Z}
+	return &Vec3{v.X + v2.X, v.Y + v2.Y, v.Z + v2.Z, 0}
 }
 
 // Add two vectors (explicit)
@@ -48,28 +53,28 @@ func Sub3(v1, v2, v3 *Vec3) {
 
 // Substract two vectors
 func (v *Vec3) Sub(v2 *Vec3) *Vec3 {
-	return &Vec3{v.X - v2.X, v.Y - v2.Y, v.Z - v2.Z}
+	return &Vec3{v.X - v2.X, v.Y - v2.Y, v.Z - v2.Z, 0}
 }
 
 // Multiply two vectors elementwise
 func (v *Vec3) Mul(v2 *Vec3) *Vec3 {
-	return &Vec3{v.X * v2.X, v.Y * v2.Y, v.Z * v2.Z}
+	return &Vec3{v.X * v2.X, v.Y * v2.Y, v.Z * v2.Z, 0}
 }
 
 // get the normalized vector ( |v| == 1 )
 func (v *Vec3) Normalize() *Vec3 {
 	n := v.Length()
-	return &Vec3{v.X / n, v.Y / n, v.Z / n}
+	return &Vec3{v.X / n, v.Y / n, v.Z / n, 0}
 }
 
 // Scale a vector by a factor
 func (v *Vec3) Scale(s float32) *Vec3 {
-	return &Vec3{v.X * s, v.Y * s, v.Z * s}
+	return &Vec3{v.X * s, v.Y * s, v.Z * s, 0}
 }
 
 // Cross-Product
 func (a *Vec3) Cross(b *Vec3) *Vec3 {
-	return &Vec3{a.Y*b.Z - a.Z*b.Y, a.Z*b.X - a.X*b.Z, a.X*b.Y - a.Y*b.X}
+	return &Vec3{a.Y*b.Z - a.Z*b.Y, a.Z*b.X - a.X*b.Z, a.X*b.Y - a.Y*b.X, 0}
 }
 
 // Cross-Product (implicit)

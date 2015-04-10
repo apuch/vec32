@@ -237,13 +237,13 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 func getDimVec(bb *OrthoBox) Vec3 {
 	dist := bb.P1.Sub(&bb.P0)
 	if dist.X >= dist.Y && dist.X >= dist.Z && dist.X > 10*EPS {
-		return Vec3{1, 0, 0}
+		return NewVec3(1, 0, 0)
 	} else if dist.Y >= dist.X && dist.Y >= dist.Z && dist.Y > 10*EPS {
-		return Vec3{0, 1, 0}
+		return NewVec3(0, 1, 0)
 	} else if dist.Z >= dist.X && dist.Z >= dist.Y && dist.Z > 10*EPS {
-		return Vec3{0, 0, 1}
+		return NewVec3(0, 0, 1)
 	} else {
-		return Vec3{0, 0, 0}
+		return NewVec3(0, 0, 0)
 	}
 }
 

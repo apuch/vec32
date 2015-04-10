@@ -29,8 +29,8 @@ func TestVec2(t *testing.T) {
 }
 
 func TestVec3(t *testing.T) {
-	v := Vec3{3, 4, 5}
-	v2 := Vec3{5, 6, 7}
+	v := NewVec3(3, 4, 5)
+	v2 := NewVec3(5, 6, 7)
 	n := float32(math.Sqrt(3*3 + 4*4 + 5*5))
 	testVec3Generic(t, v, 3, n)
 	testFloat(t, "X", 3, v.X)
@@ -38,11 +38,11 @@ func TestVec3(t *testing.T) {
 	testFloat(t, "Z", 5, v.Z)
 	testString(t, "String()", "[3; 4; 5]", v.String())
 	testFloat(t, "Dot()", 3*5+4*6+5*7, v.Dot(&v2))
-	testVec3(t, "Add()", &Vec3{8, 10, 12}, v.Add(&v2))
-	testVec3(t, "Sub()", &Vec3{-2, -2, -2}, v.Sub(&v2))
-	testVec3(t, "Normalize()", &Vec3{3.0 / n, 4.0 / n, 5.0 / n}, v.Normalize())
-	testVec3(t, "Scale()", &Vec3{6, 8, 10}, v.Scale(2))
-	testVec3(t, "Mul()", &Vec3{15, 24, 35}, v.Mul(&v2))
+	testVec3(t, "Add()", NewVec3(8, 10, 12), *v.Add(&v2))
+	testVec3(t, "Sub()", NewVec3(-2, -2, -2), *v.Sub(&v2))
+	testVec3(t, "Normalize()", NewVec3(3.0/n, 4.0/n, 5.0/n), *v.Normalize())
+	testVec3(t, "Scale()", NewVec3(6, 8, 10), *v.Scale(2))
+	testVec3(t, "Mul()", NewVec3(15, 24, 35), *v.Mul(&v2))
 }
 
 func TestNormNaN(t *testing.T) {
@@ -86,11 +86,11 @@ func TestEqual(t *testing.T) {
 		a, b    Vec3
 		isEqual bool
 	}{
-		{Vec3{1, 2, 3}, Vec3{1, 2, 3}, true},
-		{Vec3{0, 0, 0}, Vec3{0, 0, 0}, true},
-		{Vec3{0, 0, 0}, Vec3{FLOAT_MIN, 0, 0}, false},
-		{Vec3{0, 0, 0}, Vec3{0, FLOAT_MIN, 0}, false},
-		{Vec3{0, 0, 0}, Vec3{0, 0, FLOAT_MIN}, false},
+		{NewVec3(1, 2, 3), NewVec3(1, 2, 3), true},
+		{NewVec3(0, 0, 0), NewVec3(0, 0, 0), true},
+		{NewVec3(0, 0, 0), NewVec3(FLOAT_MIN, 0, 0), false},
+		{NewVec3(0, 0, 0), NewVec3(0, FLOAT_MIN, 0), false},
+		{NewVec3(0, 0, 0), NewVec3(0, 0, FLOAT_MIN), false},
 	}
 	for i, tc := range cases {
 		if tc.a.IsEqual(&tc.b) != tc.isEqual || tc.b.IsEqual(&tc.a) != tc.isEqual {
@@ -101,8 +101,8 @@ func TestEqual(t *testing.T) {
 }
 
 func TestCross(t *testing.T) {
-	c := &Vec3{5*7 - 6*6, 5*6 - 4*7, 4*6 - 5*5}
-	testVec3(t, "crossProduct", c, v3_1.Cross(&v3_2))
+	c := NewVec3(5*7-6*6, 5*6-4*7, 4*6-5*5)
+	testVec3(t, "crossProduct", c, *v3_1.Cross(&v3_2))
 }
 
 func TestOrthoBoxArea(t *testing.T) {
@@ -110,11 +110,11 @@ func TestOrthoBoxArea(t *testing.T) {
 		bb   OrthoBox
 		area float32
 	}{
-		{OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 1}}, 6},
-		{OrthoBox{Vec3{1, 1, 1}, Vec3{1, 1, 1}}, 0},
-		{OrthoBox{Vec3{1, 1, 1}, Vec3{2, 2, 2}}, 6},
-		{OrthoBox{Vec3{1, 1, 1}, Vec3{5, 2, 2}}, 18},
-		{OrthoBox{Vec3{0, 0, 0}, Vec3{1, 1, 0}}, 2},
+		{OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 1, 1)}, 6},
+		{OrthoBox{NewVec3(1, 1, 1), NewVec3(1, 1, 1)}, 0},
+		{OrthoBox{NewVec3(1, 1, 1), NewVec3(2, 2, 2)}, 6},
+		{OrthoBox{NewVec3(1, 1, 1), NewVec3(5, 2, 2)}, 18},
+		{OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 1, 0)}, 2},
 	}
 	for i, tc := range cases {
 		area := tc.bb.Area()
@@ -128,9 +128,9 @@ var (
 	v2_1 = Vec2{3, 4}
 	v2_2 = Vec2{5, 6}
 	v2_3 = Vec2{0, 0}
-	v3_1 = Vec3{4, 5, 6}
-	v3_2 = Vec3{5, 6, 7}
-	v3_3 = Vec3{0, 0, 0}
+	v3_1 = NewVec3(4, 5, 6)
+	v3_2 = NewVec3(5, 6, 7)
+	v3_3 = NewVec3(0, 0, 0)
 )
 
 func BenchmarkLengthSq2(b *testing.B) {
@@ -190,14 +190,14 @@ func testString(t *testing.T, name, exp, cur string) {
 func testVec2(t *testing.T, name string, exp, cur *Vec2) {
 	v := exp.Sub(cur)
 	if !AlmostEqual(v.Length(), 0) {
-		t.Errorf("%s is wrong - expected %s got %s", name, exp, cur)
+		t.Errorf("%s is wrong - expected %s got %s", name, exp.String(), cur.String())
 	}
 }
 
-func testVec3(t *testing.T, name string, exp, cur *Vec3) {
-	v := exp.Sub(cur)
+func testVec3(t *testing.T, name string, exp, cur Vec3) {
+	v := exp.Sub(&cur)
 	if !AlmostEqual(v.Length(), 0) {
-		t.Errorf("%s is wrong - expected %s got %s", name, exp, cur)
+		t.Errorf("%s is wrong - expected %s got %s", name, exp.String(), cur.String())
 	}
 }
 
