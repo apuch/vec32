@@ -33,7 +33,7 @@ type bvhBuilder struct {
 
 const BIN_COUNT = 12
 
-const DEBUG_LOG = 3
+const DEBUG_LOG = 0
 
 // create a new BVH Tree
 func NewBVHTree(m *Mesh, opt *BVHBuildOptions) (*BVHTree, error) {
@@ -131,8 +131,8 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 	}
 
 	var costLeft, costRight [BIN_COUNT]float32
-	cnt := bins[0].cnt
-	bb := bins[0].bb
+	cnt := 0
+	bb := ORTHO_EMPTY
 	for i := 0; i < BIN_COUNT; i++ {
 		bb.Add(&bins[i].bb)
 		cnt += bins[i].cnt
@@ -143,8 +143,8 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 		}
 	}
 
-	cnt = bins[BIN_COUNT-1].cnt
-	bb = bins[BIN_COUNT-1].bb
+	cnt = 0
+	bb = ORTHO_EMPTY
 	for i := BIN_COUNT - 1; i >= 0; i-- {
 		bb.Add(&bins[i].bb)
 		cnt += bins[i].cnt
