@@ -66,16 +66,6 @@ type Object interface {
 	OrthoBox() OrthoBox
 }
 
-// Join two boxes, adding the second to the first
-func (bb *OrthoBox) Add(bb2 *OrthoBox) {
-	bb.P0.X = Min(bb.P0.X, bb2.P0.X)
-	bb.P0.Y = Min(bb.P0.Y, bb2.P0.Y)
-	bb.P0.Z = Min(bb.P0.Z, bb2.P0.Z)
-	bb.P1.X = Max(bb.P1.X, bb2.P1.X)
-	bb.P1.Y = Max(bb.P1.Y, bb2.P1.Y)
-	bb.P1.Z = Max(bb.P1.Z, bb2.P1.Z)
-}
-
 func (bb *OrthoBox) Area() float32 {
 	dx := bb.P1.X - bb.P0.X
 	dy := bb.P1.Y - bb.P0.Y

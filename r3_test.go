@@ -58,17 +58,62 @@ func BenchmarkR3AddE(b *testing.B) {
 	}
 }
 
-func BenchmarkR3LengthSqNative(b *testing.B) {
-	v := NewVec3(3, 4, 5)
+func BenchmarkR3AddEGeneric(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		LengthR3(&v)
+		add3(&v3_1, &v3_2, &v3_3)
 	}
 }
 
 func BenchmarkR3LengthSq(b *testing.B) {
 	v := NewVec3(3, 4, 5)
 	for i := 0; i < b.N; i++ {
+		LengthR3(&v)
+	}
+}
+
+func BenchmarkR3LengthSqGeneric(b *testing.B) {
+	v := NewVec3(3, 4, 5)
+	for i := 0; i < b.N; i++ {
 		lengthR3(&v)
+	}
+}
+func BenchmarkR3LengthSqIndirect(b *testing.B) {
+	v := NewVec3(3, 4, 5)
+	for i := 0; i < b.N; i++ {
+		v.Length()
+	}
+}
+
+func BenchmarkR3Dot(b *testing.B) {
+	v := NewVec3(3, 4, 5)
+	for i := 0; i < b.N; i++ {
+		DotR3(&v)
+	}
+}
+
+func BenchmarkR3Empty(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+	}
+}
+func BenchmarkR3Nop(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		doNop()
+	}
+}
+
+func BenchmarkR3OrthoboxAdd(b *testing.B) {
+	bb1 := OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 1, 1)}
+	bb2 := OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 1, 1)}
+	for i := 0; i < b.N; i++ {
+		OrthoBoxAdd(&bb1, &bb2)
+	}
+}
+
+func BenchmarkR3OrthoboxAddGeneric(b *testing.B) {
+	bb1 := OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 1, 1)}
+	bb2 := OrthoBox{NewVec3(0, 0, 0), NewVec3(1, 1, 1)}
+	for i := 0; i < b.N; i++ {
+		orthoBoxAdd(&bb1, &bb2)
 	}
 }
 

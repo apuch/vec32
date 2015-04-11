@@ -127,6 +127,7 @@ func (bvhb *bvhBuilder) getSplit(n *bvhNode) {
 	for _, idx := range n.tris {
 		bin := int(k1 * (bvhb.nodes[idx].p.Dot(&dimVec) - k0))
 		bins[bin].cnt += 1
+		//OrthoBoxAdd(&bins[bin].bb, &bvhb.nodes[idx].bb)
 		bins[bin].bb.Add(&bvhb.nodes[idx].bb)
 	}
 
